@@ -163,6 +163,7 @@ body.cover-active .footer-inner,body.cover-active .footer-inner a{color:rgba(255
 <div id="screen-cover" class="active">
   <div class="cover-wave"></div>
   <div class="cover-title">The Tide<br>Comes In</div>
+  <div class="cover-subtitle">a story</div>
   <div class="cover-wave"></div>
   <p class="cover-tagline">Ten chapters. One girl navigating loss, loyalty, and the hardest choices she's ever had to make.</p>
   <button class="cover-btn" id="cover-read-btn" onclick="showMain()">Begin reading</button>
@@ -665,16 +666,51 @@ function saveState(){
   try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}
 }
 
+function normaliseProgress(){
+  if(!state||!state.chapters)return;
+  state.chapters.forEach((ch,i)=>{
+    if(ch.unlocked===undefined)ch.unlocked=i===0;
+    if(ch.complete===undefined)ch.complete=false;
+    if(ch.answers===undefined)ch.answers={};
+    if(ch.vocab===undefined)ch.vocab=[];
+    if(ch.wordsTapped===undefined)ch.wordsTapped=[];
+    // PDF/summary saving is now required per chapter, not once globally.
+    if(ch.summarySaved===undefined)ch.summarySaved=false;
+  });
+  state.chapters[0].unlocked=true;
+  enforceChapterLocks();
+}
+
+function enforceChapterLocks(){
+  if(!state||!state.chapters)return;
+  state.chapters[0].unlocked=true;
+  for(let i=1;i<state.chapters.length;i++){
+    const prev=state.chapters[i-1];
+    const allowed=!!(prev.complete&&prev.summarySaved);
+    state.chapters[i].unlocked=allowed;
+    if(!allowed&&state.currentChapter>=i)state.currentChapter=i-1;
+  }
+}
+
+function markChapterSummaryUnsaved(chIdx){
+  const s=state.chapters[chIdx];
+  if(!s)return;
+  if(s.summarySaved){
+    s.summarySaved=false;
+    enforceChapterLocks();
+  }
+}
+
 let state;
 const saved=loadState();
 if(saved&&saved.chapters&&saved.chapters.length===CHAPTERS.length){
   state=saved;
-  if(state.summarySaved===undefined)state.summarySaved=false;
+  normaliseProgress();
 }else{
   state={
     currentChapter:0,
-    chapters:CHAPTERS.map(()=>({unlocked:false,complete:false,answers:{},vocab:[],wordsTapped:[]})),
-    showClinician:false,currentPopupWord:null,summarySaved:false
+    chapters:CHAPTERS.map(()=>({unlocked:false,complete:false,answers:{},vocab:[],wordsTapped:[],summarySaved:false})),
+    showClinician:false,currentPopupWord:null
   };
   state.chapters[0].unlocked=true;
 }
@@ -824,16 +860,16 @@ function renderNav(){
   document.getElementById('chapter-nav').innerHTML=CHAPTERS.map((ch,i)=>{
     const s=state.chapters[i];
     let cls='chapter-pill locked';
-    if(s.complete)cls='chapter-pill complete';
-    else if(i===state.currentChapter)cls='chapter-pill current';
+    if(s.unlocked&&s.complete)cls='chapter-pill complete';
+    else if(s.unlocked&&i===state.currentChapter)cls='chapter-pill current';
     else if(s.unlocked)cls='chapter-pill unlocked';
-    const click=(s.unlocked||s.complete)?`onclick="goToChapter(${i})"`:'';
+    const click=s.unlocked?`onclick="goToChapter(${i})"`:'';
     return`<div class="${cls}" ${click} title="Ch ${i+1}: ${ch.title}">${i+1}</div>`;
   }).join('');
 }
 function goToChapter(i){
   const s=state.chapters[i];
-  if(!s.unlocked&&!s.complete)return;
+  if(!s.unlocked)return;
   raStop();
   state.currentChapter=i;saveState();
   renderChapter();renderNav();window.scrollTo(0,0);
@@ -859,7 +895,7 @@ function renderChapter(){
 <div class="questions-section">
   <div class="questions-header">
     <div class="questions-title">Think about it</div>
-    <div class="questions-meta">5 questions · complete all to unlock next chapter</div>
+    <div class="questions-meta">5 questions · answer all, then save PDF summary to unlock next chapter</div>
   </div>
   <p class="questions-intro">Answer each question. Pick an option, write your own, or both.</p>
   ${ch.questions.map((q,qi)=>renderQuestion(q,qi,idx)).join('')}
@@ -875,7 +911,7 @@ function renderChapter(){
 </div>
 <div class="complete-banner ${s.complete?'show':''}" id="complete-banner">
   <p>Chapter ${ch.num} complete ✓</p>
-  ${idx<CHAPTERS.length-1?(state.summarySaved?`<button class="next-btn" onclick="unlockNext()">Next chapter →</button>`:`<p style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--ink-light);margin-top:0.6rem;">Save your session summary above to unlock the next chapter.</p>`):''}
+  ${idx<CHAPTERS.length-1?(s.summarySaved?`<button class="next-btn" onclick="unlockNext()">Next chapter →</button>`:`<p style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--ink-light);margin-top:0.6rem;">Save this chapter's PDF summary above to unlock the next chapter.</p>`):''}
 </div>
 `;
 
@@ -927,7 +963,9 @@ function renderVocab(){
 // ── ANSWERS ────────────────────────────────────────────────────────
 function selectMC(chIdx,qi,oi,labelEl){
   state.chapters[chIdx].answers[qi]=state.chapters[chIdx].answers[qi]||{};
+  const oldValue=state.chapters[chIdx].answers[qi].mc;
   state.chapters[chIdx].answers[qi].mc=oi;
+  if(oldValue!==undefined&&oldValue!==oi)markChapterSummaryUnsaved(chIdx);
   const block=document.getElementById(`qblock-${qi}`);
   if(block)block.querySelectorAll('.mc-option').forEach(l=>l.classList.remove('selected'));
   labelEl.classList.add('selected');
@@ -936,7 +974,9 @@ function selectMC(chIdx,qi,oi,labelEl){
 }
 function saveText(chIdx,qi,val){
   state.chapters[chIdx].answers[qi]=state.chapters[chIdx].answers[qi]||{};
+  const oldValue=state.chapters[chIdx].answers[qi].text||'';
   state.chapters[chIdx].answers[qi].text=val;
+  if(oldValue.trim()!==val.trim())markChapterSummaryUnsaved(chIdx);
   const ta=document.getElementById(`oa-${qi}`);if(ta)ta.classList.toggle('answered',val.trim().length>3);
   if(val.trim().length>3){const st=document.getElementById(`qstatus-${qi}`);if(st)st.classList.add('show');}
   saveState();checkAllAnswered(chIdx,true);
@@ -946,12 +986,17 @@ function checkAllAnswered(chIdx,showBanner){
   const done=ch.questions.every((_,qi)=>{const a=s.answers[qi]||{};return a.mc!==undefined||(a.text&&a.text.trim().length>3);});
   if(done&&!s.complete){
     s.complete=true;saveState();
-    if(showBanner){const b=document.getElementById('complete-banner');if(b)b.classList.add('show');}
+    if(showBanner){renderChapter();}
     renderNav();
   }
 }
 function unlockNext(){
   const next=state.currentChapter+1;
+  const current=state.chapters[state.currentChapter];
+  if(!current.complete||!current.summarySaved){
+    alert('Please answer every question and save this chapter\'s PDF summary before continuing.');
+    return;
+  }
   if(next<CHAPTERS.length){state.chapters[next].unlocked=true;saveState();goToChapter(next);}
 }
 function removeVocab(word){
@@ -973,10 +1018,24 @@ function showSummary(){
 }
 
 function printSummary(){
-  state.summarySaved=true;saveState();
+  const chIdx=state.currentChapter;
+  const chState=state.chapters[chIdx];
+  const chapterComplete=!!(chState&&chState.complete);
+
   window.onafterprint=function(){
     const prompt=document.getElementById('after-print-prompt');
-    if(prompt)prompt.style.display='block';
+    if(chapterComplete){
+      chState.summarySaved=true;
+      enforceChapterLocks();
+      saveState();
+      if(prompt){
+        prompt.innerHTML=`Summary saved for Chapter ${CHAPTERS[chIdx].num} ✓ — <button onclick="backToStory()" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--teal);font-weight:700;cursor:pointer;text-decoration:underline;">return to story to continue →</button>`;
+        prompt.style.display='block';
+      }
+    } else if(prompt){
+      prompt.textContent='PDF opened, but this chapter will not unlock the next chapter until all questions are answered and the summary is saved again.';
+      prompt.style.display='block';
+    }
   };
   window.print();
 }
@@ -1052,10 +1111,10 @@ function hasReadingProgress(){
 function getResumeChapter(){
   const current=Number.isInteger(state.currentChapter)?state.currentChapter:0;
   const currentState=state.chapters[current];
-  if(currentState&&(currentState.unlocked||currentState.complete))return current;
+  if(currentState&&currentState.unlocked)return current;
 
   let target=0;
-  state.chapters.forEach((c,i)=>{if(c.unlocked||c.complete)target=i;});
+  state.chapters.forEach((c,i)=>{if(c.unlocked)target=i;});
   return target;
 }
 
@@ -1065,6 +1124,7 @@ function updateCoverButton(){
 }
 
 function showMain(){
+  enforceChapterLocks();
   state.currentChapter=getResumeChapter();
   saveState();
   document.getElementById('screen-cover').classList.remove('active');
