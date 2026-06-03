@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Tide Comes In</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1814;--ink-mid:#4a4540;--ink-light:#8a847a;
+  --paper:#faf8f4;--paper-warm:#f3efe8;--paper-mid:#e8e2d8;
+  --accent:#7c3d2a;--accent-light:#c4855a;--accent-pale:#f2e8e0;
+  --teal:#2a6b6a;--teal-light:#e0f0ef;
+  --success:#3a7a3a;--success-bg:#e8f4e8;
+  --gold:#b8860b;--gold-light:#fdf3dc;
+  --r:6px;--rl:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Source Serif 4',Georgia,serif;background:var(--paper);color:var(--ink);font-size:17px;line-height:1.8;min-height:100vh;}
+#screen-cover,#screen-main,#screen-summary{display:none;}
+#screen-cover.active,#screen-main.active,#screen-summary.active{display:block;}
+/* COVER */
+#screen-cover{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;text-align:center;background:var(--ink);}
+#screen-cover.active{display:flex;}
+.cover-wave{width:100%;max-width:480px;height:3px;background:linear-gradient(90deg,transparent,var(--accent-light),var(--teal),var(--accent-light),transparent);margin:1.5rem auto;opacity:0.6;}
+.cover-title{font-family:'Playfair Display',Georgia,serif;font-size:clamp(2.8rem,8vw,5rem);color:var(--paper);line-height:1.1;letter-spacing:-0.02em;font-weight:600;}
+.cover-subtitle{font-family:'Source Serif 4',serif;font-style:italic;font-size:1.1rem;color:var(--ink-light);margin-top:0.5rem;}
+.cover-tagline{color:var(--paper-mid);font-size:0.95rem;max-width:380px;line-height:1.7;margin-top:2rem;font-style:italic;}
+.cover-btn{margin-top:3rem;padding:0.9rem 2.5rem;background:var(--accent);color:var(--paper);border:none;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.85rem;letter-spacing:0.08em;cursor:pointer;text-transform:uppercase;transition:background 0.2s,transform 0.15s;}
+.cover-btn:hover{background:var(--accent-light);transform:translateY(-1px);}
+.cover-note{margin-top:1.5rem;font-size:0.8rem;color:var(--ink-light);font-family:'DM Mono',monospace;opacity:0.6;}
+/* MAIN */
+#screen-main{max-width:900px;margin:0 auto;padding:0 1.5rem 4rem;}
+.story-header{padding:2rem 0 1.5rem;border-bottom:0.5px solid var(--paper-mid);margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.story-header-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink-mid);font-style:italic;}
+/* NAV */
+.chapter-nav{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-bottom:2.5rem;}
+.chapter-pill{aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:0.72rem;font-weight:500;border:1.5px solid var(--paper-mid);background:var(--paper);color:var(--ink-light);transition:all 0.15s;}
+.chapter-pill.unlocked{border-color:var(--accent-light);color:var(--accent);cursor:pointer;}
+.chapter-pill.unlocked:hover{background:var(--accent-pale);}
+.chapter-pill.current{background:var(--accent);color:var(--paper);border-color:var(--accent);}
+.chapter-pill.complete{background:var(--teal-light);border-color:var(--teal);color:var(--teal);cursor:pointer;}
+.chapter-pill.locked{cursor:default;opacity:0.35;}
+/* CHAPTER */
+.chapter-eyebrow{font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;color:var(--ink-light);text-transform:uppercase;margin-bottom:0.5rem;}
+.chapter-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.2;color:var(--ink);margin-bottom:0.6rem;}
+.chapter-divider{display:flex;align-items:center;gap:0.8rem;margin:1.2rem 0 2rem;}
+.chapter-divider-line{flex:1;height:0.5px;background:var(--paper-mid);}
+.chapter-divider-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+/* READ ALOUD */
+.read-aloud-bar{display:flex;align-items:center;gap:0.6rem;padding:0.6rem 1rem;background:var(--paper-warm);border:0.5px solid var(--paper-mid);border-radius:var(--r);margin-bottom:1.8rem;flex-wrap:wrap;}
+.read-aloud-bar span{font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--ink-mid);}
+.btn-ra{padding:0.28rem 0.75rem;border:0.5px solid var(--paper-mid);border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.72rem;cursor:pointer;background:var(--paper);color:var(--ink-mid);transition:all 0.15s;letter-spacing:0.03em;}
+.btn-ra:hover{border-color:var(--teal);color:var(--teal);}
+.btn-ra.active-play{background:var(--teal);color:#fff;border-color:var(--teal);}
+.btn-ra.active-pause{background:var(--accent-pale);color:var(--accent);border-color:var(--accent);}
+.btn-ra:disabled{opacity:0.35;cursor:default;}
+.speed-select{font-family:'DM Mono',monospace;font-size:0.72rem;padding:0.25rem 0.5rem;border:0.5px solid var(--paper-mid);border-radius:var(--r);background:var(--paper);color:var(--ink-mid);}
+/* STORY TEXT */
+.story-text{font-size:1.06rem;line-height:1.9;color:var(--ink);}
+.story-text p{margin-bottom:1.2em;}
+/* clickable vocab words - underlined */
+.story-text .word-tap{cursor:pointer;border-bottom:1.5px dotted var(--accent-light);transition:background 0.12s;border-radius:2px;padding:0 1px;}
+.story-text .word-tap:hover{background:var(--accent-pale);}
+.story-text .word-tap.in-vocab{border-bottom-color:var(--teal);background:var(--teal-light);}
+/* any word clicked */
+.story-text .word-any{cursor:pointer;}
+.story-text .word-any:hover{background:var(--accent-pale);border-radius:2px;}
+.story-text .word-any.in-vocab{background:var(--teal-light);border-radius:2px;}
+/* POPUP */
+.word-popup{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:0.7rem 1.2rem;border-radius:var(--rl);font-family:'DM Mono',monospace;font-size:0.8rem;z-index:1000;max-width:360px;width:92%;text-align:center;display:none;}
+.word-popup.show{display:block;animation:popIn 0.18s ease;}
+.word-popup .wname{font-size:1rem;font-weight:500;margin-bottom:0.25rem;font-family:'Playfair Display',serif;}
+.word-popup .wdef{font-size:0.78rem;color:#b0a898;line-height:1.5;}
+.word-popup .wdef.no-def{font-style:italic;opacity:0.7;}
+.popup-actions{display:flex;gap:0.5rem;justify-content:center;margin-top:0.65rem;flex-wrap:wrap;}
+.pbtn{padding:0.25rem 0.7rem;border-radius:var(--r);border:1px solid rgba(255,255,255,0.2);background:transparent;color:var(--paper);font-family:'DM Mono',monospace;font-size:0.7rem;cursor:pointer;transition:background 0.15s;}
+.pbtn:hover{background:rgba(255,255,255,0.12);}
+.pbtn.add{background:var(--teal);border-color:var(--teal);}
+.pbtn:disabled{opacity:0.45;cursor:default;}
+@keyframes popIn{from{opacity:0;transform:translateX(-50%) translateY(6px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+.section-break{text-align:center;margin:2.5rem 0;color:var(--accent-light);font-size:1rem;letter-spacing:0.5em;}
+/* QUESTIONS */
+.questions-section{margin-top:3rem;border-top:1px solid var(--paper-mid);padding-top:2rem;}
+.questions-header{display:flex;align-items:baseline;gap:1rem;margin-bottom:0.4rem;}
+.questions-title{font-family:'Playfair Display',serif;font-size:1.3rem;}
+.questions-meta{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--ink-light);}
+.questions-intro{font-style:italic;color:var(--ink-mid);font-size:0.92rem;margin-bottom:2rem;}
+.question-block{background:var(--paper-warm);border:0.5px solid var(--paper-mid);border-radius:var(--rl);padding:1.2rem 1.4rem;margin-bottom:1.2rem;}
+.question-num{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--ink-light);letter-spacing:0.06em;margin-bottom:0.4rem;}
+.question-text{font-size:0.97rem;color:var(--ink);margin-bottom:0.9rem;line-height:1.6;}
+.mc-options{display:flex;flex-direction:column;gap:0.45rem;margin-bottom:0.8rem;}
+.mc-option{display:flex;align-items:flex-start;gap:0.6rem;padding:0.5rem 0.8rem;border:0.5px solid var(--paper-mid);border-radius:var(--r);cursor:pointer;font-size:0.9rem;background:var(--paper);transition:all 0.15s;line-height:1.5;}
+.mc-option:hover{border-color:var(--accent-light);background:var(--accent-pale);}
+.mc-option.selected{border-color:var(--accent);background:var(--accent-pale);color:var(--accent);}
+.mc-option input[type=radio]{margin-top:2px;flex-shrink:0;accent-color:var(--accent);}
+.own-answer-label{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--ink-light);margin-bottom:0.35rem;display:block;letter-spacing:0.04em;}
+.own-answer{width:100%;min-height:70px;padding:0.6rem 0.8rem;border:0.5px solid var(--paper-mid);border-radius:var(--r);background:var(--paper);font-family:'Source Serif 4',serif;font-size:0.9rem;color:var(--ink);resize:vertical;transition:border-color 0.15s;}
+.own-answer:focus{outline:none;border-color:var(--accent-light);}
+.own-answer.answered{border-color:var(--success);background:var(--success-bg);}
+.q-status{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--success);margin-top:0.4rem;display:none;}
+.q-status.show{display:block;}
+/* VOCAB */
+.vocab-section{margin-top:2rem;border-top:0.5px solid var(--paper-mid);padding-top:1.5rem;}
+.vocab-title{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:0.3rem;}
+.vocab-subtitle{font-size:0.85rem;color:var(--ink-mid);font-style:italic;margin-bottom:1rem;}
+.vocab-empty{font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--ink-light);}
+.vocab-list{display:flex;flex-wrap:wrap;gap:0.5rem;}
+.vocab-chip{display:flex;align-items:center;gap:0.4rem;padding:0.3rem 0.65rem;background:var(--teal-light);border:0.5px solid var(--teal);border-radius:100px;font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--teal);}
+.vocab-chip button{background:none;border:none;cursor:pointer;color:var(--teal);font-size:0.9rem;line-height:1;padding:0;opacity:0.6;transition:opacity 0.15s;}
+.vocab-chip button:hover{opacity:1;}
+/* COMPLETE */
+.complete-banner{display:none;background:var(--success-bg);border:0.5px solid var(--success);border-radius:var(--rl);padding:1rem 1.4rem;margin-top:1.5rem;text-align:center;}
+.complete-banner.show{display:block;}
+.complete-banner p{font-size:0.9rem;color:var(--success);font-family:'DM Mono',monospace;}
+.complete-banner .next-btn{margin-top:0.8rem;padding:0.6rem 1.5rem;background:var(--accent);color:var(--paper);border:none;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.78rem;cursor:pointer;letter-spacing:0.05em;transition:background 0.15s;}
+.complete-banner .next-btn:hover{background:var(--accent-light);}
+/* SESSION SUMMARY (inline at bottom of main) */
+.summary-divider{margin-top:3rem;border-top:2px solid var(--paper-mid);padding-top:2.5rem;}
+.summary-section-title{font-family:'Playfair Display',serif;font-size:1.6rem;margin-bottom:0.3rem;}
+.summary-section-sub{font-size:0.9rem;color:var(--ink-mid);font-style:italic;margin-bottom:2rem;}
+.summary-block{background:var(--paper-warm);border:0.5px solid var(--paper-mid);border-radius:var(--rl);padding:1.2rem 1.4rem;margin-bottom:1.2rem;}
+.summary-block-title{font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:0.8rem;}
+.summary-stat-row{display:flex;justify-content:space-between;font-size:0.9rem;padding:0.25rem 0;border-bottom:0.5px solid var(--paper-mid);color:var(--ink-mid);}
+.summary-stat-row:last-child{border-bottom:none;}
+.summary-stat-val{font-family:'DM Mono',monospace;color:var(--ink);}
+.summary-response{margin-bottom:0.8rem;}
+.summary-response-q{font-size:0.82rem;color:var(--ink-mid);font-style:italic;margin-bottom:0.2rem;}
+.summary-response-a{font-size:0.9rem;color:var(--ink);background:var(--paper);border-radius:var(--r);padding:0.4rem 0.6rem;border:0.5px solid var(--paper-mid);}
+.privacy-note{background:var(--gold-light);border-left:3px solid var(--gold);border-radius:0 var(--r) var(--r) 0;padding:0.8rem 1rem;margin-bottom:1.5rem;font-size:0.85rem;color:var(--ink-mid);line-height:1.6;}
+.privacy-note strong{color:var(--ink);}
+.summary-actions{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:1.5rem;}
+.btn-primary{padding:0.7rem 1.8rem;background:var(--accent);color:var(--paper);border:none;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.8rem;letter-spacing:0.06em;cursor:pointer;transition:background 0.15s;}
+.btn-primary:hover{background:var(--accent-light);}
+.email-reminder{margin-top:1.2rem;font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--ink-light);line-height:1.7;}
+.email-reminder strong{color:var(--teal);}
+@media(max-width:600px){.chapter-nav{grid-template-columns:repeat(5,1fr);}.story-header{flex-direction:column;align-items:flex-start;}.chapter-title{font-size:1.6rem;}}
+/* FOOTER */
+#site-footer{width:100%;border-top:0.5px solid var(--paper-mid);margin-top:0;padding:1.1rem 1.5rem;background:var(--paper);}
+.footer-inner{max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:0.4rem 0.6rem;font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--ink-light);line-height:1.6;}
+.footer-sep{opacity:0.4;}
+.footer-inner a{color:var(--ink-light);text-decoration:none;border-bottom:0.5px solid currentColor;transition:color 0.15s;}
+.footer-inner a:hover{color:var(--ink-mid);}
+body.cover-active #site-footer{background:var(--ink);border-top-color:rgba(255,255,255,0.08);}
+body.cover-active .footer-inner,body.cover-active .footer-inner a{color:rgba(255,255,255,0.25);}
+@media(max-width:600px){.footer-inner{flex-direction:column;align-items:flex-start;gap:0.2rem;}.footer-sep{display:none;}}
+</style>
+</head>
+<body>
+<div id="screen-cover" class="active">
+  <div class="cover-wave"></div>
+  <div class="cover-title">The Tide<br>Comes In</div>
+  <div class="cover-subtitle">a story</div>
+  <div class="cover-wave"></div>
+  <p class="cover-tagline">Ten chapters. One girl navigating loss, loyalty, and the hardest choices she's ever had to make.</p>
+  <button class="cover-btn" onclick="showMain()">Begin reading</button>
+  <div class="cover-note">tap any word in the story to hear it and add it to your vocab list</div>
+</div>
+
+<div id="screen-main">
+  <div class="story-header">
+    <div class="story-header-title">The Tide Comes In</div>
+  </div>
+  <div class="chapter-nav" id="chapter-nav"></div>
+  <div id="chapter-container"></div>
+</div>
+
+<div class="word-popup" id="word-popup">
+  <div class="wname" id="popup-word"></div>
+  <div class="wdef" id="popup-def"></div>
+  <div class="popup-actions">
+    <button class="pbtn add" id="popup-add-btn" onclick="addCurrentWordToVocab()">Add to vocab list</button>
+    <button class="pbtn" onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+<footer id="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 Gwen Gan. All rights reserved.</span>
+    <span class="footer-sep">·</span>
+    <span>Developed for the intended family and treating clinicians only. Not for redistribution.</span>
+    <span class="footer-sep">·</span>
+    <span>Enquiries: <a href="mailto:gwengan96@gmail.com">gwengan96@gmail.com</a></span>
+  </div>
+</footer>
+
+<script>
+// ── KNOWN DEFINITIONS (pre-loaded vocab words) ──────────────────────
+const DEFS={
+  mournful:"Feeling or expressing deep sadness or grief.",
+  silhouette:"The dark shape of something seen against a lighter background.",
+  precarious:"Not safe or stable; likely to fall or change suddenly.",
+  condolences:"Expressions of sympathy for someone experiencing loss.",
+  excessive:"More than what is necessary or wanted; too much.",
+  reflex:"A sudden, automatic movement made without thinking.",
+  inevitably:"In a way that is impossible to avoid or prevent.",
+  amicable:"Done in a friendly way, without argument or bad feeling.",
+  disconcerting:"Causing a feeling of worry or unease; unsettling.",
+  appraising:"Looking at something carefully to decide its value or nature.",
+  compelling:"Very interesting; making you want to pay attention.",
+  ominous:"Suggesting that something bad is going to happen; threatening.",
+  reputation:"The beliefs or opinions held about someone, generally by many people.",
+  relentless:"Never stopping or losing intensity; persistent in a harsh way.",
+  surging:"Moving suddenly and powerfully, like a wave.",
+  deliberately:"Done in a careful and intentional way, not by accident.",
+  humiliated:"Made to feel ashamed or foolish in front of others.",
+  counterproductive:"Producing the opposite result to the one you wanted.",
+  regret:"Sadness about something you wish you had done differently.",
+  tolerable:"Able to be accepted or endured; just bearable.",
+  vigilant:"Keeping careful watch for possible danger or difficulties.",
+  idling:"Running at a low speed, without much power.",
+  explanations:"Statements or reasons that make something clear.",
+  methodically:"Done in a careful and well-organised way, following a set plan.",
+  efficiency:"The ability to do something well without wasting time or energy.",
+  suspicion:"A feeling that someone has done something wrong, without being certain.",
+  treacherous:"Dangerous in a way that is not obvious; likely to cause harm without warning.",
+  urgency:"Importance requiring immediate action or attention.",
+  strained:"Showing signs of worry or difficulty; tense and not relaxed.",
+  coercion:"The practice of making someone do something by using force or threats.",
+  vulnerable:"Open to harm or attack; in a weak or unprotected position.",
+  betray:"To act against someone who trusts you; to be disloyal.",
+  interrupting:"Stopping someone while they are speaking.",
+  official:"Relating to an organisation with authority; formally approved.",
+  operation:"An organised activity involving several people, often requiring secrecy.",
+  measured:"Slow and careful; thought about before being done.",
+  withdrawal:"The act of moving back or away from a place or situation.",
+  negotiate:"To try to reach an agreement through discussion.",
+  suppress:"To stop yourself from showing a feeling or reaction.",
+  catastrophic:"Causing sudden and extreme harm or damage; disastrously bad.",
+  accountable:"Required to justify your actions; responsible for what you do.",
+  superfluous:"More than is needed; unnecessary; in the way.",
+  chaos:"Complete disorder and confusion.",
+  ragged:"Rough and uneven; used to describe breathing that sounds harsh and broken.",
+  accelerated:"Made something happen faster than expected.",
+  pervasive:"Spreading through or into every part of something.",
+  stock:"To think carefully about a situation before deciding what to do.",
+  prerogative:"A right or privilege belonging to a particular person or group.",
+  confirmed:"Made it certain; proved that something is true.",
+  accommodated:"Made space for; adjusted to make room for someone's needs.",
+  meticulous:"Done with great attention to detail and care.",
+  reckoning:"A time when the results of past actions catch up with you.",
+  warehouse:"A large building used for storing goods or people temporarily.",
+  bureaucratic:"Relating to the complicated rules and processes of official organisations.",
+  fanfare:"A lot of attention or publicity; making a big deal of something.",
+  navigate:"To find your way through something complex or difficult.",
+  bracing:"Fresh and cold in a way that makes you feel awake and alive.",
+  sacrificed:"Given up something important or valuable for the sake of something else.",
+  inevitable:"Certain to happen and impossible to prevent or avoid."
+};
+// ── CHAPTERS DATA ──────────────────────────────────────────────────
+const CHAPTERS=[
+{num:1,title:"New Shore",
+text:`<p>The ferry horn was the ugliest sound Maya had ever heard.</p>
+<p>It came in one long, <u class="word-tap" data-word="mournful">mournful</u> blast that bounced off the grey water and settled somewhere in her ribs. She stood at the railing with her duffel bag between her feet and watched the island get bigger. <u class="word-tap" data-word="silhouette">Silhouette</u> of hills. A cluster of rooftops. A lighthouse with chipped white paint.</p>
+<p>Paekakariki Island. Population: 1,200. Her new home.</p>
+<p>She turned her back on it and looked at the mainland instead — at the city she was leaving behind, now just a smudge on the horizon. Six weeks ago she'd had her mum, her seven brothers and sisters, her school, her whole <u class="word-tap" data-word="precarious">precarious</u>, patched-together life. Now she had one duffel bag and a social worker who kept calling her "sweetheart."</p>
+<p>Maya was thirteen years old and she did not need anyone's <u class="word-tap" data-word="condolences">condolences</u>.</p>
+<p>Aunt Reka was waiting on the dock. Maya recognised her from a single photo — a tall woman, Māori on her dad's side like Maya, with strong hands and grey-streaked hair pulled back under a wide-brimmed hat. She was holding a handwritten sign that said MAYA in capital letters, which felt <u class="word-tap" data-word="excessive">excessive</u> for someone who had presumably been told what her niece looked like.</p>
+<p>"You didn't have to do the sign," Maya said, instead of hello.</p>
+<p>Aunt Reka lowered it. "Fair enough." She reached for the bag and Maya stepped back without thinking — a <u class="word-tap" data-word="reflex">reflex</u>, sharp and old. Reka's expression didn't change. She just pointed toward the car park. "Hungry?"</p>
+<p>"Not really."</p>
+<p>"I made umu-cooked lamb. But not really is fine too."</p>
+<p>They drove in silence along a coastal road that twisted through pohutukawa trees. The sea kept appearing on Maya's left, between gaps in the bush — green-blue and alive, flecked with white. She had grown up with the motorway and the sound of neighbours through walls. This felt wrong. Too quiet. Too much sky.</p>
+<p>Aunt Reka's house was at the end of an unsealed road, two storeys, weatherboard painted dark green. A vegetable garden out front. Wind chimes made from pāua shell on the porch. The sound they made was the only pretty thing Maya had noticed all day.</p>
+<p>Her room was small and clean. There was a window that looked out over the water. Someone had put a fresh sprig of tī kōuka in a glass on the windowsill — native flax leaves, used for weaving, used to mark important things.</p>
+<p>She didn't unpack. She sat on the edge of the bed and looked at the water and tried not to think about her brothers and sisters waking up tomorrow in four different houses, four different strangers' rooms, wondering where she was.</p>
+<p>Tried. Failed.</p>
+<p>She told herself she would be gone before the year was out. She would find a way back. She would fix everything. She was thirteen, which felt young, but she had been taking care of her family since she was nine, and she knew how to make plans in dark rooms.</p>
+<p>That night she heard the tide come in while she lay awake. It didn't crash. It came in slowly, <u class="word-tap" data-word="inevitably">inevitably</u>, like it had been doing this her whole life without her noticing. Water reaching up the sand. Pulling back. Trying again.</p>
+<p>Maya stared at the ceiling and did not sleep for a long time.</p>`,
+questions:[
+{text:"Maya turns her back on the island and looks at the mainland. What do you think is going through her head at that moment?",options:["She's hoping the boat will turn around","She's trying to hold onto something familiar before it disappears","She doesn't care — she's just bored","She's angry at Aunt Reka for being there"],q:"mc"},
+{text:"When Aunt Reka reaches for Maya's bag and Maya steps back without thinking, it's called a 'reflex.' What does that small moment tell us about Maya's past?",options:["She's very protective of her belongings","People reaching toward her has sometimes meant something bad was coming","She just didn't want help","She was startled by a sound"],q:"mc"},
+{text:"Aunt Reka doesn't make a big deal of Maya stepping back. What was she probably thinking?",options:["She didn't notice","She decided not to push Maya and give her space to feel safe first","She was distracted","She was annoyed but hiding it"],q:"mc"},
+{text:"If you were Aunt Reka picking Maya up at the dock, what's one thing you would have done differently — or the same?",q:"open"},
+{text:"Maya tells herself she'll fix everything and be gone before the year is out. If you were Maya's friend and she told you this plan, what would you say to her?",q:"open"}
+]},
+{num:2,title:"The Undercurrent",
+text:`<p>School started on a Tuesday, which felt wrong. Mondays were bad enough.</p>
+<p>Paekakariki Area School had 340 students, Years 1–13 all crammed under one set of roofs. Maya sat at the back of her form class. She kept her hoodie on. She counted ceiling tiles — twenty-four.</p>
+<p>The girl next to her had bright orange nail varnish and was reading a novel under the desk.</p>
+<p>"What's it about?" Maya asked, surprising herself.</p>
+<p>The girl looked up without alarm, which Maya noted. Most people flinched a little when Maya spoke first. "Ghost story. But not scary. Just sad." She showed the cover. Then: "You're the one who came on the ferry yesterday."</p>
+<p>"Word travels."</p>
+<p>"It's a small island." She shrugged. "I'm Hinerangi. Hine."</p>
+<p>"Maya."</p>
+<p>Hine went back to her book. Maya went back to ceiling tiles. Somehow that was the most <u class="word-tap" data-word="amicable">amicable</u> conversation Maya had had with a peer in three months.</p>
+<p>At lunch she found a bench near the library and ate the sandwich Aunt Reka had made without asking what she liked. Avocado and tomato. It was good, which was <u class="word-tap" data-word="disconcerting">disconcerting</u>.</p>
+<p>Three kids came and sat nearby. They had a deliberate casualness — the kind of relaxed that was actually very carefully arranged. The boy in the middle had a bright white smile and an expensive jacket for a school on an island. The two girls on either side were watching Maya like she was something they were deciding the price of.</p>
+<p>"New girl," said the boy. His name, she'd later learn, was Cody. "What's your deal?"</p>
+<p>"Eating lunch," said Maya.</p>
+<p>He smiled wider. "You staying with Reka Tūhoe? My dad knows her."</p>
+<p>"Good for your dad."</p>
+<p>The girls exchanged a glance. One of them — <u class="word-tap" data-word="appraising">appraising</u>, sharp-eyed — said, "You're funny." It didn't sound like a compliment or an insult. More like a classification.</p>
+<p>Cody leaned forward. "We know everything that happens on this island. Could be useful. Depending on what you need."</p>
+<p>"I don't need anything," Maya said.</p>
+<p>"Everybody needs something." He said it like a fact. Like weather. He stood up, tugged his jacket straight. "We hang out at the South Wharf after school. Come if you want."</p>
+<p>They left. Maya looked at her sandwich.</p>
+<p>Hine materialised beside her, book in hand, and sat down uninvited. "You should probably not go to the South Wharf after school."</p>
+<p>"You were listening."</p>
+<p>"Small island." Hine opened her book. "Cody Parata thinks this place owes him something. He's not always wrong about what people need. That's the part that's dangerous."</p>
+<p>Maya watched him cross the quad — easy stride, the group reforming around him like water. She had known people like Cody before. People who offered things that weren't free.</p>
+<p>"Why are you telling me?" Maya asked.</p>
+<p>Hine didn't look up from her page. "Because you answered me without flinching and nobody does that on the first day." She turned a page. "Also you seem like trouble and I find trouble <u class="word-tap" data-word="compelling">compelling</u>."</p>
+<p>Maya almost laughed. She turned it into a cough.</p>
+<p>That afternoon she walked home along the coast road. The water was dark today, <u class="word-tap" data-word="ominous">ominous</u> at the edges where the current ran deep. She thought about Cody's smile. About Hine's warning. About the way information on a small island moved like water — finding every crack.</p>
+<p>She thought: I should just keep my head down.</p>
+<p>She thought: I have never once in my life kept my head down.</p>
+<p>She went home and ate dinner with Aunt Reka in near-silence and felt, for one strange moment, almost like something she couldn't name.</p>`,
+questions:[
+{text:"What clues tell you that Cody might not be someone to trust — even though he was friendly and didn't do anything obviously wrong?",options:["His clothes are too expensive for the island","The way he positioned himself, his planned 'casualness', and offering things before knowing what Maya needed","He sat too close","The girls with him looked unfriendly"],q:"mc"},
+{text:"Hine warns Maya without being asked. What do you think her reason was?",options:["She wants to impress Maya","She's seen what Cody does to new people and wants to stop it happening again","She's just nosy","She wants Maya to stay away so she can have the bench"],q:"mc"},
+{text:"Maya thinks 'I should keep my head down' — and then thinks she's never done that. Why do people keep doing things they know might cause problems?",options:["They don't actually know it's a problem","Old habits are hard to stop even when you can see where they lead","They're just being careless","They enjoy getting in trouble"],q:"mc"},
+{text:"If you were Maya and Cody invited you to the South Wharf — would you have gone? What would make you decide one way or the other?",q:"open"},
+{text:"Hine sits down next to Maya uninvited and gives her a warning. If you were the new person, what would you think of Hine at this point?",q:"open"}
+]},
+{num:3,title:"Saltwater",
+text:`<p>It happened on a Thursday. It always happened on a Thursday, in Maya's experience — the week had gone long enough to wear her down, but the weekend was still too far away to be useful.</p>
+<p>It started in Science.</p>
+<p>They were doing a group assignment on tidal patterns. Maya had stayed up until one in the morning reading ahead, which she did not tell anyone because she had a <u class="word-tap" data-word="reputation">reputation</u> to consider. She knew more about this topic than she was letting on.</p>
+<p>The problem was the boy across the table.</p>
+<p>His name was Jared and he had been making small comments since day one — nothing the teacher would catch, nothing she could point to, just a <u class="word-tap" data-word="relentless">relentless</u> drip. You're not doing it right. That's not how we do it here. Did you actually read the instructions? He said them in a half-voice, with a half-smile, looking at his worksheet the whole time.</p>
+<p>On Thursday he said: "Must be different where you're from."</p>
+<p>Maya put down her pen very carefully. She had a system for moments like this. She named the feeling — that hot, <u class="word-tap" data-word="surging">surging</u> thing behind her sternum. She gave it three seconds. She reminded herself of the consequences.</p>
+<p>She got to two seconds.</p>
+<p>"Say that again," she said.</p>
+<p>Jared looked up, finally. "I'm just saying—"</p>
+<p>"Say it again." Her voice was very flat. Her hands were on the desk, <u class="word-tap" data-word="deliberately">deliberately</u> still.</p>
+<p>"I didn't mean anything—"</p>
+<p>"Then don't say things you don't mean." She stood up. Her chair scraped loudly. The whole class went quiet in that particular way — the waiting kind of quiet. "You've been doing this for a week and you're going to stop now."</p>
+<p>The teacher, Ms. Hauraki, was there in three seconds. "Maya. Sit down, please."</p>
+<p>"I'm not doing anything. I'm telling him to stop."</p>
+<p>"Sit. Down."</p>
+<p>There was a moment — and Maya knew this moment, had lived in it dozens of times — where she could choose. She could sit. She could swallow it. She could decide that being right was less important than what happened next.</p>
+<p>She knocked her folder off the desk instead. Not at anyone. Just — off the desk. Papers everywhere. The sound was worse than she intended.</p>
+<p>She was sent to the office. Aunt Reka was called.</p>
+<p>Maya sat in a plastic chair and stared at a motivational poster about eagles until she wanted to tear it down. She was not sorry. She was <u class="word-tap" data-word="humiliated">humiliated</u>, which was different, and she was furious, which was something else again.</p>
+<p>Aunt Reka arrived without rushing. She sat in the chair beside Maya and did not speak for a long moment.</p>
+<p>"He was being racist," Maya said.</p>
+<p>"Did you tell the teacher that?"</p>
+<p>"I told him to stop."</p>
+<p>"That's not what I asked."</p>
+<p>Maya said nothing. She had always thought 'use your words' was something people said to get you to accept being treated badly.</p>
+<p>But Aunt Reka didn't give that speech. She said: "What you did took guts. And it was <u class="word-tap" data-word="counterproductive">counterproductive</u>."</p>
+<p>Maya looked at her sideways.</p>
+<p>"He'll say you're unstable. They'll watch you now instead of him. The thing you were angry about — which was real — is now buried under the thing you did. You gave him an out." She said it without heat. Like she was describing tides. "I'm not saying sit quietly. I'm saying: what did you actually want to happen?"</p>
+<p>Maya thought about it. Honestly thought about it.</p>
+<p>"I wanted him to stop and know that I knew."</p>
+<p>"And did that happen?"</p>
+<p>"...No."</p>
+<p>Aunt Reka nodded once. Got up. Signed the form. "Come on. I'll make you something."</p>
+<p>They drove home with the windows down, the sea air coming through, cold and sharp. Maya felt the anger drain slowly out of her, like water leaving a rock pool.</p>
+<p>What was left was something harder to name. Something close to <u class="word-tap" data-word="regret">regret</u>. Not for standing up. For the folder. For the way the whole class had looked at her.</p>`,
+questions:[
+{text:"What clues tell us that Maya actually tried to stop herself — she wasn't just reacting without thinking?",options:["She had a whole system — named the feeling, counted to three, thought about consequences — but lost it at two seconds","She moved her chair slowly","She whispered instead of shouting","She waited until the teacher left"],q:"mc"},
+{text:"Aunt Reka says 'what you did took guts and it was counterproductive.' Why say both instead of just picking one?",options:["She was trying to confuse Maya","She was acknowledging the courage while being honest about the outcome — both things were true","She didn't want to be too harsh","She was actually angry and hiding it"],q:"mc"},
+{text:"Reka asks 'what did you actually want to happen?' — and Maya has to really think about it. If you were Maya, what would your honest answer have been?",q:"open"},
+{text:"If you were in Maya's position and Jared kept making comments for a week, what would you have done differently — or the same?",q:"open"},
+{text:"By the end of the chapter, something shifts between Maya and Reka even though they don't talk about it. What do you think changed?",options:["Nothing has changed","Maya is starting to see that Reka won't lecture or shame her, and that's new","Reka is angry but hiding it","They are now closer because of the argument"],q:"mc"}
+]},
+{num:4,title:"The Map",
+text:`<p>It was Hine who pointed it out.</p>
+<p>They had been spending lunches together for two weeks by then — not officially friends, but sitting at the same bench, reading different things, occasionally saying sentences at each other. Maya found it <u class="word-tap" data-word="tolerable">tolerable</u>, which was high praise from her.</p>
+<p>"Your aunt has a boat," Hine said one afternoon, not looking up from her book.</p>
+<p>"What about it?"</p>
+<p>"She goes out at night. Thursday nights. Late."</p>
+<p>Maya looked at her. "How do you know that?"</p>
+<p>"My cousin lives near the boat shed. Says Reka's been doing it for years." Hine turned a page. "Probably nothing."</p>
+<p>Maya thought about Aunt Reka — the early mornings, the locked shed at the back of the property, the way she sometimes watched the water with an expression Maya couldn't quite read. <u class="word-tap" data-word="vigilant">Vigilant</u>. That was the word for it. Like someone waiting for something.</p>
+<p>That Thursday she set her alarm for midnight.</p>
+<p>From her bedroom window she watched Aunt Reka cross the back garden in the dark, carrying something — a bag, or a box. The boat shed door opened and closed. Fifteen minutes later she heard the low <u class="word-tap" data-word="idling">idling</u> of a small engine moving away from the dock.</p>
+<p>She was back before two.</p>
+<p>Maya told Hine the next day. Hine was quiet for a moment. "Okay. That's genuinely interesting."</p>
+<p>"What's out there? To the south?"</p>
+<p>"Open water. The Rangi Shoals. Some of the older fishing families used to anchor out there. There's a small island. Uninhabited, mostly. Wairakau Point. People used to use it for storing things they didn't want to store on the main island."</p>
+<p>"Storing what?"</p>
+<p>"Fishing gear. Building materials." She met Maya's eyes. "Other things."</p>
+<p>Maya spent the rest of the school day not concentrating. She went through possible <u class="word-tap" data-word="explanations">explanations</u> the way she used to go through escape routes in difficult situations — <u class="word-tap" data-word="methodically">methodically</u>, ruling things out. Aunt Reka could be fishing. She could be meeting someone. She could be doing something completely ordinary that only seemed strange because Maya was looking for strangeness.</p>
+<p>She could be involved in something that would put them both in danger.</p>
+<p>At dinner that night Maya watched her aunt and tried to see her clearly. Reka moved through the kitchen with quiet <u class="word-tap" data-word="efficiency">efficiency</u>. She asked Maya about school without making it feel like an interview.</p>
+<p>Maya wanted to ask directly. She almost did, twice.</p>
+<p>Both times she stopped herself. Because what she had realised was that her aunt was someone who chose her words carefully. Who waited. Who trusted slowly. If there was something to know, asking out of <u class="word-tap" data-word="suspicion">suspicion</u> would close the door. She needed to earn the answer.</p>
+<p>"Reka," she said, over dishes. "Do you know anyone at Wairakau Point?"</p>
+<p>The pause was small. Almost undetectable. Aunt Reka kept drying the pan. "Old families used the point for storage. Why?"</p>
+<p>"Just heard the name at school."</p>
+<p>"Hm." She put the pan away. "Stay away from the point, Maya. The currents around those shoals are <u class="word-tap" data-word="treacherous">treacherous</u>." A beat. "Even for experienced swimmers."</p>
+<p>She said it evenly. She did not say: how did you hear that name? She just offered the warning and moved on.</p>
+<p>Maya filed it. Something was happening out there. And Aunt Reka was in the middle of it. The question was not whether to find out. The question was how to do it without losing the one person on this island who had treated her like she was worth something.</p>`,
+questions:[
+{text:"When Maya asks about Wairakau Point and Reka pauses before answering — what does that small pause tell us?",options:["She didn't hear the question","The name means something to her, and she was deciding how much to say","She was just thinking","She was going to change the subject but decided not to"],q:"mc"},
+{text:"People hide things for lots of different reasons. What are some reasons Reka might be keeping a secret?",options:["To protect someone else from danger","Out of shame or embarrassment","Because the truth is too complicated to explain quickly","All of these are possible — we don't know enough yet"],q:"mc"},
+{text:"Maya stops herself from asking directly because she thinks it'll close the door. If you were Maya, would you have waited — or asked straight out? What would you have done?",q:"open"},
+{text:"Hine gives Maya information but says 'probably nothing' — then stays curious. What kind of friend is Hine turning out to be?",options:["Someone who tells you what you want to hear","Someone who gives you information and lets you make your own decision","Someone who wants drama","Someone secretly feeding information back to Reka"],q:"mc"},
+{text:"If Reka had told Maya about the boat trips on her first week, how do you think the story would have been different?",q:"open"}
+]},
+{num:5,title:"Caught in the Rip",
+text:`<p>It was Hine who was in trouble. That was the part Maya hadn't predicted.</p>
+<p>It happened on a Saturday. Maya had been on the island for three weeks. She hadn't swum yet. She wasn't ready.</p>
+<p>Hine had texted: Come to the South Wharf. Bring nothing. Don't tell anyone.</p>
+<p>Maya stared at the message. The text had a <u class="word-tap" data-word="urgency">urgency</u> to it that didn't match Hine's usual calm. She thought about ignoring it. She thought about telling Aunt Reka.</p>
+<p>She went.</p>
+<p>The South Wharf was deserted except for Hine, sitting on a piling with her arms wrapped around herself, and Cody, standing a few metres away with his hands in his pockets, smiling his careful smile.</p>
+<p>"You came," Hine said. Her voice was <u class="word-tap" data-word="strained">strained</u>.</p>
+<p>"What's going on?"</p>
+<p>Cody answered. "Hine owes me something. A favour. A while back she borrowed money — for her koro's prescription, which is a sad story, don't get me wrong. But she borrowed it and now I'm collecting." He spread his hands like this was all very reasonable. "What I want is simple. Information about your aunt's boat trips."</p>
+<p>Maya felt the air change.</p>
+<p>"I don't know anything about—"</p>
+<p>"You've been on the island three weeks. You're observant. Don't." He kept smiling. "I'm not asking you to do anything. Just tell me where she goes. When. What she carries."</p>
+<p>"And if I don't?"</p>
+<p>"Then Hine's debt becomes a different kind of problem." He glanced at her. "She's been covering for some things. Things that could make her life at school very difficult."</p>
+<p>"That's <u class="word-tap" data-word="coercion">coercion</u>," Maya said flatly.</p>
+<p>"That's how things work." He said it like a fact. Like gravity. "You've got two days. Think about it."</p>
+<p>He left. Just like that. Easy stride, hands in pockets.</p>
+<p>Maya sat beside Hine on the piling. For a moment neither of them spoke. The water moved under the wharf, dark and constant.</p>
+<p>"I should've told you," Hine said. "I thought it was dealt with."</p>
+<p>"How long has this been going on?"</p>
+<p>"Six months." She stared at the water. "My koro got sick in winter. I was desperate. Cody seemed like he was helping. I didn't realise the cost until later."</p>
+<p>Maya looked at her friend. She thought about the version of this she knew — the version where someone offers help that isn't free, and you don't see the hook until it's too late.</p>
+<p>"He wants me to spy on Reka," Maya said slowly. "Which means whatever Reka is doing, Cody is either trying to stop it or take it over."</p>
+<p>Hine nodded. "He controls a lot of what comes onto this island. If there's something going around him—"</p>
+<p>"She's not a criminal," Maya said. She said it with more certainty than she felt. "Reka's not—"</p>
+<p>"I know." Hine looked at her directly. "I think she's helping people. I think that's exactly why he wants to know about it."</p>
+<p>Maya felt something click into place. The late nights. The box. The warning about the currents. Not hiding something illegal. Hiding something <u class="word-tap" data-word="vulnerable">vulnerable</u>.</p>
+<p>She had two days to decide whether to <u class="word-tap" data-word="betray">betray</u> the one adult who had shown her something like trust — or let her friend drown in a problem Maya hadn't caused.</p>
+<p>She stood up. "I'm not telling Cody anything."</p>
+<p>"Maya—"</p>
+<p>"And neither are you." She offered her hand. "We figure this out differently. Together. But I need you to trust me for two days."</p>
+<p>Hine looked at her hand for a long moment. Then she took it.</p>
+<p>The tide was coming in under the wharf. Maya could hear it — that steady, inevitable sound. She did not have a plan yet. But she had made a choice, and sometimes, she had found, the choice had to come first.</p>`,
+questions:[
+{text:"What makes Cody's approach more dangerous than if he had just been openly threatening?",options:["He's physically bigger","He's reasonable and calm — it makes it harder to point to him as the problem","He has more people with him","He picks a public place"],q:"mc"},
+{text:"Hine borrowed money for her grandfather's medication and ended up trapped. What does this say about what happens when people don't have proper support?",options:["It shows she made a bad decision","It shows how people in desperate situations can be taken advantage of — that's a system problem, not just a personal one","It's just bad luck","She should have found another way"],q:"mc"},
+{text:"Maya decides first and admits she doesn't have a plan. If you were the one making this choice, would you decide first and figure it out later — or wait until you had a plan? Why?",q:"open"},
+{text:"Hine covered for Cody for six months without telling anyone. If you were Hine's friend and found out, what would you have wanted her to do — and what would you say to her?",q:"open"},
+{text:"Maya says 'I'm not telling Cody anything' — but she also doesn't have a way out yet. What do you think she should do next?",options:["Tell Reka everything immediately","Wait and come up with a plan first","Go back to Cody and stall","Ask Hine what she knows about Cody's weaknesses"],q:"mc"}
+]},
+{num:6,title:"What the Waves Carry",
+text:`<p>Maya told Aunt Reka on Sunday morning.</p>
+<p>Not everything — not Cody, not the two-day deadline. She started smaller. She told her she knew about the boat trips. She told her she wasn't going to tell anyone. She told her she needed to understand.</p>
+<p>Aunt Reka listened without <u class="word-tap" data-word="interrupting">interrupting</u>. She stood at the kitchen bench with her hands around a mug of tea, looking out at the garden. When Maya finished, she was quiet for a long time.</p>
+<p>Then she said: "How much trouble are you in?"</p>
+<p>Maya blinked. "I'm not—"</p>
+<p>"Someone is pushing you toward this conversation. You wouldn't have had it otherwise." She turned. "How much trouble?"</p>
+<p>Maya told her the rest.</p>
+<p>Aunt Reka sat down. She closed her eyes briefly — not in shock. More like someone who had known a risk was there and had just heard it land. She said: "Cody Parata has his father's eyes and his grandfather's reach. I thought we had more time."</p>
+<p>"More time for what?"</p>
+<p>Reka looked at her carefully. Then she made a decision — Maya could see it — the way her expression changed, like a door that had been slightly ajar being opened wider.</p>
+<p>"There are families," she said slowly, "who came to this island with nothing. People who arrived by boat and who couldn't, for various reasons, go through the <u class="word-tap" data-word="official">official</u> channels. Wairakau Point is sheltered. I've been bringing supplies. Food. Medicine. Warm clothing." She met Maya's eyes. "It's been going on for two years."</p>
+<p>Maya held the information carefully, the way you hold something fragile. "Are they safe?"</p>
+<p>"As safe as I can make them. Three families. Two children." She paused. "One of them is about your age."</p>
+<p>Maya thought about this. Thought about the locked shed. The box she'd seen carried in the dark. The warmth of that kitchen — the umu lamb, the pāua wind chimes, all of it — and then this, happening in parallel.</p>
+<p>"Why didn't you tell me?"</p>
+<p>"You arrived broken," Aunt Reka said. Not unkindly. Like stating a fact. "I needed to know I could trust you before I could put other people's safety in your hands." A beat. "I still wasn't sure. You showed me something last week — the way you handled the Jared situation. You were angry and you were right, and you still came back and thought about it clearly afterward. That's not nothing."</p>
+<p>"I knocked a folder off a desk."</p>
+<p>"And then you listened." She looked at her. "Do you know how rare that is?"</p>
+<p>Maya felt something move in her chest that she wasn't ready to examine.</p>
+<p>"Cody knows there's something going on," she said instead. "He wants information. He'll use it — to take over the <u class="word-tap" data-word="operation">operation</u>, or report it, depending on what's more useful to him."</p>
+<p>"Yes."</p>
+<p>"So we have two days."</p>
+<p>"Yes."</p>
+<p>Maya looked at her hands. She thought about the families on the point — three families, two children, one her age. She thought about her own seven siblings in four different houses. She thought about what it meant to be somewhere that wasn't safe and have someone decide to help anyway.</p>
+<p>"What can I do?" she asked.</p>
+<p>Aunt Reka studied her for a long, <u class="word-tap" data-word="measured">measured</u> moment. "The person Cody's put pressure on — your friend. She needs to feel like she's not alone in this."</p>
+<p>"She's not."</p>
+<p>"Make sure she knows that." She stood. "And don't do anything I haven't said yes to first. I mean it, Maya."</p>
+<p>"Okay."</p>
+<p>"I mean it."</p>
+<p>"I know." Maya met her eyes. "I won't."</p>
+<p>She walked back to her room and sat on the bed and looked at the water. The tide was going out now — a long, slow <u class="word-tap" data-word="withdrawal">withdrawal</u>. But she had learned by now that going out was just the other half of coming in. The water always returned.</p>
+<p>She picked up her phone and texted Hine: Still with you. Working on it. Don't respond to Cody yet.</p>
+<p>The reply came in seconds: Ok. Thank you.</p>
+<p>Two small words. Maya read them twice, then put the phone face-down on the bed. She had never been someone people thanked. She wasn't sure yet how to hold it.</p>`,
+questions:[
+{text:"Aunt Reka figures out Maya is being pressured before Maya even says so. What does that tell us about how Reka thinks?",options:["She's suspicious of Maya","She's experienced enough to know what pressure looks like when someone arrives at a difficult conversation","She already knew about Cody","She was guessing"],q:"mc"},
+{text:"Reka says Maya arrived 'broken' and she needed to trust her before risking other people's safety. Is that a reasonable thing to do — or was it unfair to Maya?",options:["Reasonable — it wasn't Maya's secret to carry until she was ready","Unfair — Maya should have been included from the start","Both things are true at once","It doesn't matter now"],q:"mc"},
+{text:"Reka's operation was genuinely helping people. But it also put Maya in danger without her knowing. Can something be right and risky at the same time? How do you decide?",options:["If the cause is good enough, the risk is worth it","People affected by the risk deserve to know about it","It depends on how much danger there actually was","These decisions are always messy — there's rarely a clean answer"],q:"mc"},
+{text:"Maya says she's never been someone people thank. If you were Hine, what would you want Maya to know right now?",q:"open"},
+{text:"If you were one of the families on Wairakau Point and heard that someone new on the island knew your secret — what would you be thinking?",q:"open"}
+]},
+{num:7,title:"Breaking Surface",
+text:`<p>Maya made the decision alone. That was the first mistake.</p>
+<p>She had told Aunt Reka she wouldn't do anything without a yes. She had meant it. But the call from Hine came at three in the afternoon — Cody had moved the deadline forward. He wanted an answer by nightfall. And Reka was on a supply run and not picking up her phone.</p>
+<p>Maya stood in the kitchen for four minutes, which she counted. She thought about waiting. She thought about what would happen if Cody decided Hine's silence was an answer. She thought about the families on the point and what it would mean for them if Cody got what he wanted.</p>
+<p>She went to the South Wharf.</p>
+<p>She had a plan. It wasn't a great plan, but it had structure: she would tell Cody she had information — partial, credible — and in return she would <u class="word-tap" data-word="negotiate">negotiate</u> Hine's debt cleared. She would not say anything true. She would buy them time.</p>
+<p>What she had not accounted for was that Cody had company. Four people this time. Two she didn't recognise — older, from the mainland side. They were not there to negotiate.</p>
+<p>"New information," she said, keeping her voice level. "But I want the debt cleared first. In writing, or with witnesses."</p>
+<p>Cody looked at the two strangers. One of them — a man with a grey jacket and no expression — looked back at Maya. "What do you know about Wairakau Point?"</p>
+<p>Her stomach dropped.</p>
+<p>He wasn't Cody's friend. He was Cody's employer. Or something worse.</p>
+<p>"I know it's a place," she said.</p>
+<p>"We've had reports," the man said. "Boat traffic. Unregistered. Twice a week." He watched her face. "Are there people out there?"</p>
+<p>Maya thought of the families. Of two children. Of one her age. Of Aunt Reka crossing the garden in the dark.</p>
+<p>She thought: I cannot answer this question honestly. I cannot answer it dishonestly without giving something away. I cannot stay silent without that being an answer.</p>
+<p>So she did the worst possible thing. She panicked.</p>
+<p>"I don't know what you're talking about," she said. Too fast. Too flat. The way you speak when you're trying to <u class="word-tap" data-word="suppress">suppress</u> the truth and it shows anyway.</p>
+<p>The man with the grey jacket nodded slowly. Like he had just received the answer he came for.</p>
+<p>"You should go home," he said. Pleasantly. "Tell your aunt that the Shoals are being monitored. For her own safety."</p>
+<p>Maya walked. She didn't run, because running would have been worse. She walked along the waterfront with her hands in her pockets and her heart making a lot of noise.</p>
+<p>She had just confirmed everything.</p>
+<p>She had gone alone. Without a plan that accounted for unknowns. Without telling Reka. Without waiting. And in the <u class="word-tap" data-word="catastrophic">catastrophic</u> three seconds of panic, she had told the worst possible person exactly what they needed to know.</p>
+<p>She called Reka from the road. Her hands weren't shaking. That was the strange part. She was completely calm in the way that only happens after something has already gone wrong — the decision was made, the damage was done, the only thing left was to be <u class="word-tap" data-word="accountable">accountable</u>.</p>
+<p>"I made a mistake," she said when Reka picked up. "I went to the wharf. Someone was there that I didn't expect. I panicked and I think I confirmed the families are real. You need to move them tonight."</p>
+<p>Silence.</p>
+<p>"Are you safe?" Reka's voice was careful and even.</p>
+<p>"Yes."</p>
+<p>"Go home. Don't stop. I'm twenty minutes away."</p>
+<p>Maya walked home in the low afternoon light. She counted her footsteps instead of ceiling tiles. She did not try to make herself feel better. She did not tell herself it might be okay. She just walked, and counted, and let the weight of it sit where it was.</p>
+<p>She had done something brave. She had done it badly. Both of those things were true. And people could get hurt because of it.</p>
+<p>That was the part she had to sit with.</p>`,
+questions:[
+{text:"Maya counted four minutes in the kitchen before deciding. What do those four minutes tell us about what was happening inside her?",options:["She was wasting time","She knew she was at a crossroads and was genuinely trying to make the right call — she just didn't have enough information","She was afraid and froze","She had already made up her mind and was just waiting"],q:"mc"},
+{text:"When the man asks 'Are there people out there?' — what were Maya's three impossible options?",options:["Tell the truth, lie, or stay silent — all three would give something away","Tell the truth and negotiate","Lie well enough to buy time","Stay silent and walk away"],q:"mc"},
+{text:"Maya calls Reka immediately and says 'I made a mistake.' If you were Maya, would you have called straight away or waited? What would have been going through your head?",q:"open"},
+{text:"She tells herself 'both of those things are true' — she was brave and she was bad at it. Do you agree that both can be true at the same time?",options:["Yes — intentions count for something even when outcomes are bad","No — results are what matter","It matters for how you feel about yourself, but not for the people affected","Yes, and it's what you do next that decides which one defines you"],q:"mc"},
+{text:"If you were one of the families on the point and found out what happened — what would you want Maya to know?",q:"open"}
+]},
+{num:8,title:"The Storm",
+text:`<p>Reka moved fast.</p>
+<p>By the time Maya got home her aunt was already on the phone — low, measured, in te reo that Maya caught the rhythm of but couldn't follow word by word. She was writing on a notepad. She was not panicking. She was doing what people who have planned for worst cases do: executing the backup plan.</p>
+<p>Maya stood in the kitchen doorway. She felt <u class="word-tap" data-word="superfluous">superfluous</u>. Like she had caused a flood and was now watching people sandbag.</p>
+<p>"Sit," Reka said, not unkindly, phone still to her ear. Maya sat.</p>
+<p>The next three hours were organised <u class="word-tap" data-word="chaos">chaos</u>. Reka made eight calls. A man Maya didn't know came and went with a key. A woman arrived, older, with a truck and a practised urgency that told Maya she had done this before. There were quiet conversations in the hallway, in Samoan, in te reo, in English when they needed Maya to understand something.</p>
+<p>"What can I do?" she asked, every fifteen minutes. Each time Reka looked at her and said: "Stay here and be ready."</p>
+<p>It was one of the hardest things she'd ever done.</p>
+<p>Hine arrived at seven, on foot, having clearly run part of the way. Her face was pale and her breathing was <u class="word-tap" data-word="ragged">ragged</u>. "Cody knows something changed," she said. "He's at the wharf. He has people watching the water."</p>
+<p>"How many?"</p>
+<p>"Three that I saw. Maybe more."</p>
+<p>Reka came out of the hallway. She looked at Hine without surprise. "You're Mere's granddaughter," she said. "I recognise you."</p>
+<p>Hine blinked. "Yes."</p>
+<p>"Your koro's doing better." She said it like an aside, but it wasn't. She put a hand briefly on Hine's shoulder. "Thank you for coming."</p>
+<p>Hine looked like she might fall over. She didn't. She straightened.</p>
+<p>The plan was to move the families from the point to a location on the island's north end, through a contact of Reka's who had an unused building. The route had to avoid the wharf. The timing had to be before the tide turned at midnight.</p>
+<p>"There's a window," Reka said. "Two hours. Starting at ten."</p>
+<p>"What goes wrong if Cody sees the boats?" Maya asked.</p>
+<p>"He reports to people who will make the families' situation very difficult very quickly." She said it plainly. "These people have already been through enough. I won't have them pay for my miscalculation."</p>
+<p>"It wasn't your miscalculation," Maya said. "It was mine."</p>
+<p>Reka looked at her directly. "We've had this conversation. I made choices that created the situation. You made a choice that <u class="word-tap" data-word="accelerated">accelerated</u> it. Both things are true. Neither of us gets the whole weight." She held Maya's eyes. "You understand me?"</p>
+<p>Maya did not cry. She had not cried in four years and she was not starting tonight. But something loosened in her chest — some old knot that had been there so long she had stopped noticing it.</p>
+<p>"What do I do?" she asked.</p>
+<p>"You and Hine: watch the south road. Text me every fifteen minutes. If Cody moves his people toward the north dock, I need ten minutes' warning."</p>
+<p>Maya looked at Hine. Hine looked back. They had never been tested together before. They had eaten sandwiches and read books and said sentences at each other. Now this.</p>
+<p>"Okay," Maya said.</p>
+<p>She didn't feel ready. She went anyway. That, she was learning, was often how it worked.</p>
+<p>The island at night was a different place — the lights sparse, the sound of the water <u class="word-tap" data-word="pervasive">pervasive</u>, the stars overhead with no city light to wash them out.</p>
+<p>Ten minutes in, Hine said quietly: "I'm sorry I got you into this."</p>
+<p>"I got myself into it," Maya said. "I made choices too."</p>
+<p>"Still."</p>
+<p>"Still," Maya agreed. She sent the first text to Reka. All clear south road. "When this is over, we should probably talk about your koro's medication properly. Find a way that doesn't involve Cody."</p>
+<p>Hine was quiet for a moment. "Yeah. Okay."</p>
+<p>They watched the water. The lights on the wharf were still. The clock moved toward ten.</p>`,
+questions:[
+{text:"Reka is moving fast and making calls, but she's not panicking. What does that kind of response — calm in a crisis — actually look like from the inside?",options:["She doesn't actually feel afraid","She's trained herself to do the next task instead of sitting in the fear — and that's something you can learn","She's pretending to be calm","She's done this so many times it doesn't feel like a crisis"],q:"mc"},
+{text:"When Reka tells Maya 'neither of us gets the whole weight' — why is that an important thing to say to Maya specifically?",options:["She's trying to make herself feel better","Maya has a pattern of taking all the blame or all the control — being told she doesn't carry it alone is genuinely new","She wants Maya to feel less guilty so she'll help","It's just something adults say"],q:"mc"},
+{text:"Hine shows up after running there even though she had every reason to stay out of it. If you were Hine, what would have made you decide to run toward the problem instead of staying away?",q:"open"},
+{text:"Maya says 'I didn't feel ready. I went anyway.' Is there a difference between feeling ready and being ready? What do you think?",q:"open"},
+{text:"At the end, Maya brings up the koro's medication — not as a solution, just as something to deal with later. What does it tell you about her that she thinks of this in the middle of a crisis?",options:["She's distracted","She's thinking about the root cause and her friend's long-term situation, not just the emergency","She's nervous and saying the first thing that comes to mind","She wants Hine to feel better"],q:"mc"}
+]},
+{num:9,title:"What Holds",
+text:`<p>The families made it.</p>
+<p>Maya didn't know the details until the next morning. At ten past midnight, after two hours of watching the south road with Hine and sending fifteen-minute texts into the dark, Reka called: it's done. Go home. Well done.</p>
+<p>She slept for nine hours without dreaming.</p>
+<p>When she came downstairs, Reka was at the kitchen table with two mugs of tea and a look on her face that Maya couldn't immediately read. It wasn't anger. It wasn't relief, exactly. It was something in between — the expression of someone who has been through something difficult and is now on the other side of it, taking <u class="word-tap" data-word="stock">stock</u>.</p>
+<p>"Sit," she said. Maya sat. She took the mug.</p>
+<p>"I want to tell you something," Reka said. "And I want you to let me finish before you say anything." She waited for Maya's nod. "When you were placed with me, I told the social worker I'd take you. Not because I was asked first — there were other family members contacted — but because I asked to."</p>
+<p>Maya held very still.</p>
+<p>"I've known about you for years. Your mum — my brother's wife — she didn't make it easy for that side of the family to stay connected. That was her <u class="word-tap" data-word="prerogative">prerogative</u> and I won't speak badly of her. But I knew you existed. I knew what kind of situation you were in." She looked at the mug. "I should have tried harder to reach you sooner. I have to live with that."</p>
+<p>Maya didn't say anything. She was honouring the request.</p>
+<p>"What I'm trying to tell you," Reka said, "is that you did not end up here by accident. I chose this. I chose you." A pause. "And last night didn't change that. It <u class="word-tap" data-word="confirmed">confirmed</u> it."</p>
+<p>The quiet that followed was a different kind of quiet from the ones Maya was used to. Not tense. Not waiting. Just — full.</p>
+<p>She did not know how to respond to being chosen. It was not a thing that had happened to her before in any way she could name. She had been kept. She had been tolerated. She had been managed and <u class="word-tap" data-word="accommodated">accommodated</u>. She had, she realised, never been genuinely selected.</p>
+<p>"I don't always make good decisions," she said.</p>
+<p>"I know."</p>
+<p>"I can be — I know I'm hard to—"</p>
+<p>"I know that too." Reka looked at her evenly. "You're also thirteen, carrying about forty years' worth of survival instincts that you've had to build yourself. I'm not looking for perfect. I'm looking for someone willing to keep trying." She tilted her head. "Are you?"</p>
+<p>Maya thought about the folder knocked off the desk. The South Wharf. The three seconds of panic that had changed everything. She thought about calling Reka immediately. About sitting on a bench with Hine watching nothing for two hours and doing it anyway.</p>
+<p>"Yeah," she said. "I am."</p>
+<p>Reka nodded. "Then we're fine."</p>
+<p>Later that afternoon, Maya went to Hine's house. Hine's koro — a small, sharp-eyed man in his eighties — was in the garden doing something <u class="word-tap" data-word="meticulous">meticulous</u> with a tomato plant.</p>
+<p>He looked at her over his glasses. "You're Reka's girl."</p>
+<p>"I'm her niece."</p>
+<p>"Same thing." He went back to his tomatoes. "Thank you for helping my granddaughter."</p>
+<p>Maya stood there for a moment, unsure what to do with that. "She helped me first," she said finally.</p>
+<p>"Good," he said. "That's how it should work."</p>
+<p>Inside, Hine was at the kitchen table with her book and a cup of milo. She looked up when Maya came in. "Did everyone make it?"</p>
+<p>"Yes."</p>
+<p>She exhaled — a long, shaky breath she'd been holding since last night. Maybe longer. "Good."</p>
+<p>They sat together. Hine read. Maya looked out the window at the old man in the garden, tending his plants with the kind of calm that comes from having been through enough that tomatoes feel like something worth caring about.</p>
+<p>She thought about her siblings — scattered, all of them getting through their own versions of this. She thought about what it meant to be somewhere that wasn't safe and have someone decide to help anyway.</p>
+<p>She thought: I am still here. That is not nothing. I am still trying. That is also not nothing.</p>
+<p>She borrowed a page from Hine's notebook and started writing a letter to her oldest brother. She didn't know yet if she'd send it. But she started.</p>`,
+questions:[
+{text:"Reka says she chose Maya — and that last night confirmed it, not changed it. Why does it matter whether someone chose you versus just accepted you?",options:["It doesn't really matter — what matters is being safe","Being chosen means someone saw who you were and decided to stay — that's different from just being placed somewhere","It matters mostly for younger kids","It depends on how they treat you day-to-day"],q:"mc"},
+{text:"Maya says she can be hard to deal with but doesn't finish the sentence. What do you think she was about to say — and why do you think she stopped?",q:"open"},
+{text:"Hine's koro says 'she helped you first — that's how it should work.' What does that say about his view of how people should look after each other?",options:["Help should be repaid like a debt","Help moves around — you give, you receive, it doesn't always balance out exactly and that's okay","The person who helps first is more important","You should only help people who will help you back"],q:"mc"},
+{text:"Maya starts a letter to her brother but doesn't know if she'll send it. If you were writing a letter to someone you miss and couldn't decide whether to send it — what would make you decide?",q:"open"},
+{text:"If you were Maya, what would you have done differently over the last few chapters to get to a better outcome — or do you think she handled it as well as she could?",q:"open"}
+]},
+{num:10,title:"The Tide Comes In",
+text:`<p>A month after the families were moved, Cody Parata left the island.</p>
+<p>She found out from Hine, who had heard it from her koro, who had heard it from someone at the boat shed. He had apparently had some kind of <u class="word-tap" data-word="reckoning">reckoning</u> with the people he worked for — the men from the mainland side — and the island had become inconvenient. He was gone on a Tuesday ferry. No one said goodbye.</p>
+<p>Maya heard the news and waited to feel something significant. Satisfaction, maybe. Or relief. Instead she felt — nothing much. The island carried on. The school continued. The Science class finished their tidal patterns assignment, and Maya got the highest grade in the group, which she also told no one about.</p>
+<p>Some things, she was learning, didn't need to be announced.</p>
+<p>The families from Wairakau Point were still on the island — in the building at the north end, which turned out to be an old <u class="word-tap" data-word="warehouse">warehouse</u> that Reka's contact had quietly converted into something liveable. Aunt Reka was working with lawyers and advocates on what happened next. It was slow. It was <u class="word-tap" data-word="bureaucratic">bureaucratic</u>. There were days when nothing moved and days when one phone call shifted everything. Reka did it without <u class="word-tap" data-word="fanfare">fanfare</u>.</p>
+<p>Maya helped where she could. Not heroically. She helped the way you help when you're part of something — by showing up, carrying things, making tea, sitting with a small girl named Sione who didn't speak much and liked having someone nearby anyway. She was not saving anyone. She was just being present, which she was slowly learning was sometimes the most important thing.</p>
+<p>She sent the letter to her brother. He wrote back, three weeks later. It was short. It said: I know. Me too. We're going to be okay.</p>
+<p>She cried, then. The first time in four years. Alone, in her room, with the window open and the sound of the tide coming in. She let it happen, and then she washed her face, and she went downstairs and helped Reka with dinner.</p>
+<p>Hine's koro's medication was sorted out through a health fund that Reka knew about — it hadn't even required Cody, it had just required someone knowing where to look. Maya thought about that a lot. How often the impossible thing is just the thing no one has bothered to <u class="word-tap" data-word="navigate">navigate</u> yet.</p>
+<p>On a Saturday in early winter, she went swimming for the first time.</p>
+<p>Not far — just to the shallows at the cove near the house, where the water was calm and the rocks were flat. Reka came with her and stood at the edge. Maya walked in up to her knees. Then her waist. The cold was extraordinary — <u class="word-tap" data-word="bracing">bracing</u>, like being grabbed by something honest. She stood in it for a long time.</p>
+<p>She thought about the easy things she had almost done.</p>
+<p>She could have told Cody what he wanted to know, that first time. It would have been so easy. Hine's debt cleared. No more pressure. She could have reasoned it to herself — she didn't really know the families, she owed nothing to strangers, she was new here, it wasn't her fight. All of it true. All of it a way of becoming someone she didn't want to be.</p>
+<p>She thought about every moment where the easy choice had been there — a door she could have walked through — and how it would have looked, from the other side, to see what she would have let happen. She would have been fine, probably. Safe. And she would have known, in the part of herself she could not switch off, what she had <u class="word-tap" data-word="sacrificed">sacrificed</u> for that safety.</p>
+<p>That was the thing about easy. It was only easy for a moment. After that, you had to live in the world you had made by choosing it.</p>
+<p>She waded in to her shoulders. The cold settled into something bearable, then something almost good. She could hear Reka behind her on the rocks, not saying anything, just there.</p>
+<p>She floated on her back. The sky was winter-blue and enormous. She could hear the sound of the tide — the same sound she had heard on her first night, through the window, while she lay awake making plans to leave.</p>
+<p>She was still here.</p>
+<p>She was, she realised, still here and not fighting it anymore. Not planning the escape. Not counting the days. Just — here. On this island, in this water, in this particular version of her life, which was broken in places and surprising in others and hers.</p>
+<p>She was thirteen years old. She had seven siblings she loved and missed. She had an aunt who had chosen her. She had a friend who read books under desks and showed up running. She had made some very bad decisions and some hard good ones, and she was still working out which was which.</p>
+<p>The tide came in around her, slow and <u class="word-tap" data-word="inevitable">inevitable</u>, the same way it always had.</p>
+<p>She let it.</p>`,
+questions:[
+{text:"Maya waits to feel something when Cody leaves and feels — not much. What does that tell us about what she was actually fighting for?",options:["She never cared about Cody that much","She was never fighting against Cody — she was fighting for the people on the point. His leaving isn't the point.","She's just tired","She's still processing it"],q:"mc"},
+{text:"Maya goes swimming for the first time — in the cold, with Reka on the rocks nearby. What do you think that moment represents beyond just swimming?",options:["She's testing herself physically","She's choosing to be present in the place she's in, instead of already trying to leave — it's a small act of staying","She's celebrating Cody leaving","She just wanted to swim"],q:"mc"},
+{text:"By the end, what has actually changed in Maya — not her situation, but her? What is she doing differently than in Chapter 1?",options:["She's waiting. Listening. Acting with others instead of alone. Accepting help. Letting care in.","She's calmer","She's less defiant","She's happier"],q:"mc"},
+{text:"Maya thinks about all the easy choices she almost made. If you were Maya floating in the water, what easy choice from your own life are you glad you didn't take?",q:"open"},
+{text:"If you could write the next chapter — what would Maya do next with her life on the island?",q:"open"}
+]}
+];
+// ── STATE + PERSISTENCE ────────────────────────────────────────────
+const SAVE_KEY='tide_comes_in_v2';
+function loadState(){
+  try{const s=localStorage.getItem(SAVE_KEY);if(s)return JSON.parse(s);}catch(e){}
+  return null;
+}
+function saveState(){
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}
+}
+
+let state;
+const saved=loadState();
+if(saved&&saved.chapters&&saved.chapters.length===CHAPTERS.length){
+  state=saved;
+}else{
+  state={
+    currentChapter:0,
+    chapters:CHAPTERS.map(()=>({unlocked:false,complete:false,answers:{},vocab:[],wordsTapped:[]})),
+    showClinician:false,currentPopupWord:null
+  };
+  state.chapters[0].unlocked=true;
+}
+
+// ── READ ALOUD ─────────────────────────────────────────────────────
+let synth=window.speechSynthesis;
+let raUtterance=null;
+let raState='stopped'; // stopped | playing | paused
+let raChunkIdx=0;
+let raChunks=[];
+
+function buildChunks(text){
+  // split into sentences for pausable reading
+  return text.match(/[^.!?]+[.!?]+/g)||[text];
+}
+
+function updateRaButtons(){
+  const play=document.getElementById('ra-play');
+  const pause=document.getElementById('ra-pause');
+  const stop=document.getElementById('ra-stop');
+  if(!play)return;
+  play.disabled=raState==='playing';
+  pause.disabled=raState==='stopped';
+  stop.disabled=raState==='stopped';
+  play.classList.toggle('active-play',raState==='playing');
+  pause.classList.toggle('active-pause',raState==='paused');
+}
+
+function raPlay(){
+  if(raState==='playing')return;
+  const storyEl=document.querySelector('.story-text');
+  if(!storyEl)return;
+  if(raState==='paused'&&raChunks.length){
+    // resume from current chunk
+    speakChunksFrom(raChunkIdx);
+  } else {
+    // fresh start
+    synth.cancel();
+    raChunks=buildChunks(storyEl.innerText);
+    raChunkIdx=0;
+    speakChunksFrom(0);
+    state.chapters[state.currentChapter].readAloudUsed=true;
+    saveState();
+  }
+  raState='playing';
+  updateRaButtons();
+}
+
+function speakChunksFrom(idx){
+  if(idx>=raChunks.length){raStop();return;}
+  raChunkIdx=idx;
+  const sp=document.getElementById('ra-speed');
+  const u=new SpeechSynthesisUtterance(raChunks[idx]);
+  u.rate=sp?parseFloat(sp.value):0.9;
+  u.onend=()=>{
+    if(raState==='playing')speakChunksFrom(idx+1);
+  };
+  raUtterance=u;
+  synth.speak(u);
+}
+
+function raPause(){
+  if(raState!=='playing')return;
+  synth.cancel();
+  raState='paused';
+  updateRaButtons();
+}
+
+function raStop(){
+  synth.cancel();
+  raState='stopped';
+  raChunkIdx=0;
+  raChunks=[];
+  updateRaButtons();
+}
+
+// ── POPUP + WORD CLICKS ────────────────────────────────────────────
+function makeTextClickable(container){
+  // walk text nodes and wrap individual words
+  const walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT,{
+    acceptNode(node){
+      const p=node.parentElement;
+      if(p.classList.contains('word-tap')||p.tagName==='BUTTON'||p.tagName==='SCRIPT'||p.tagName==='STYLE')
+        return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const toReplace=[];
+  let node;
+  while(node=walker.nextNode()){
+    if(node.textContent.trim())toReplace.push(node);
+  }
+  toReplace.forEach(textNode=>{
+    const frag=document.createDocumentFragment();
+    const parts=textNode.textContent.split(/(\b\w+\b)/);
+    parts.forEach(part=>{
+      if(/^\w+$/.test(part)&&part.length>2){
+        const span=document.createElement('span');
+        span.className='word-any';
+        span.textContent=part;
+        span.addEventListener('click',e=>{e.stopPropagation();showWordPopup(part,null,span);});
+        frag.appendChild(span);
+      } else {
+        frag.appendChild(document.createTextNode(part));
+      }
+    });
+    textNode.parentNode.replaceChild(frag,textNode);
+  });
+}
+
+function showWordPopup(word,def,el){
+  const w=word.toLowerCase();
+  const defText=def||DEFS[w]||null;
+  document.getElementById('popup-word').textContent=word;
+  const defEl=document.getElementById('popup-def');
+  if(defText){defEl.textContent=defText;defEl.classList.remove('no-def');}
+  else{defEl.textContent='No definition stored — add to your vocab list anyway?';defEl.classList.add('no-def');}
+  state.currentPopupWord=word;
+  const chS=state.chapters[state.currentChapter];
+  if(!chS.wordsTapped.includes(word))chS.wordsTapped.push(word);
+  saveState();
+  const addBtn=document.getElementById('popup-add-btn');
+  const already=chS.vocab.includes(word);
+  addBtn.textContent=already?'Already in list':'Add to vocab list';
+  addBtn.disabled=already;
+  document.getElementById('word-popup').classList.add('show');
+  // speak it
+  if(synth){synth.cancel();const u=new SpeechSynthesisUtterance(word);u.rate=0.85;synth.speak(u);}
+}
+function closePopup(){document.getElementById('word-popup').classList.remove('show');state.currentPopupWord=null;}
+function addCurrentWordToVocab(){
+  const word=state.currentPopupWord;if(!word)return;
+  const chS=state.chapters[state.currentChapter];
+  if(!chS.vocab.includes(word)){
+    chS.vocab.push(word);saveState();renderVocab();
+    const addBtn=document.getElementById('popup-add-btn');
+    addBtn.textContent='Added!';addBtn.disabled=true;
+    // highlight in text
+    document.querySelectorAll('.word-tap,.word-any').forEach(el=>{
+      if(el.textContent.toLowerCase()===word.toLowerCase())el.classList.add('in-vocab');
+    });
+  }
+}
+
+// ── NAV ────────────────────────────────────────────────────────────
+function renderNav(){
+  document.getElementById('chapter-nav').innerHTML=CHAPTERS.map((ch,i)=>{
+    const s=state.chapters[i];
+    let cls='chapter-pill locked';
+    if(s.complete)cls='chapter-pill complete';
+    else if(i===state.currentChapter)cls='chapter-pill current';
+    else if(s.unlocked)cls='chapter-pill unlocked';
+    const click=(s.unlocked||s.complete)?`onclick="goToChapter(${i})"`:'';
+    return`<div class="${cls}" ${click} title="Ch ${i+1}: ${ch.title}">${i+1}</div>`;
+  }).join('');
+}
+function goToChapter(i){
+  const s=state.chapters[i];
+  if(!s.unlocked&&!s.complete)return;
+  raStop();
+  state.currentChapter=i;saveState();
+  renderChapter();renderNav();window.scrollTo(0,0);
+}
+
+// ── CHAPTER RENDER ─────────────────────────────────────────────────
+function renderChapter(){
+  const idx=state.currentChapter;const ch=CHAPTERS[idx];const s=state.chapters[idx];
+  document.getElementById('chapter-container').innerHTML=`
+<div class="chapter-eyebrow">Chapter ${ch.num} of ${CHAPTERS.length}</div>
+<h1 class="chapter-title">${ch.title}</h1>
+<div class="chapter-divider"><div class="chapter-divider-line"></div><div class="chapter-divider-dot"></div><div class="chapter-divider-line"></div></div>
+<div class="read-aloud-bar">
+  <span>Listen:</span>
+  <button class="btn-ra" id="ra-play" onclick="raPlay()" title="Play">▶ Play</button>
+  <button class="btn-ra" id="ra-pause" onclick="raPause()" title="Pause" disabled>⏸ Pause</button>
+  <button class="btn-ra" id="ra-stop" onclick="raStop()" title="Stop" disabled>⏹ Stop</button>
+  <select class="speed-select" id="ra-speed"><option value="0.7">Slow</option><option value="0.9" selected>Normal</option><option value="1.1">Fast</option></select>
+  <span style="font-size:0.7rem;color:var(--ink-light)">tap any word to hear it</span>
+</div>
+<div class="story-text" id="story-text">${ch.text}</div>
+<div class="section-break">· · ·</div>
+<div class="questions-section">
+  <div class="questions-header">
+    <div class="questions-title">Think about it</div>
+    <div class="questions-meta">5 questions · complete all to unlock next chapter</div>
+  </div>
+  <p class="questions-intro">Answer each question. Pick an option, write your own, or both.</p>
+  ${ch.questions.map((q,qi)=>renderQuestion(q,qi,idx)).join('')}
+</div>
+<div class="vocab-section">
+  <div class="vocab-title">Your vocab list</div>
+  <p class="vocab-subtitle">Words you've tapped and saved. Remove any you already know.</p>
+  <div class="vocab-list" id="vocab-list">${renderVocabHTML(s.vocab)}</div>
+</div>
+<div class="complete-banner ${s.complete?'show':''}" id="complete-banner">
+  <p>Chapter ${ch.num} complete ✓</p>
+  ${idx<CHAPTERS.length-1?`<button class="next-btn" onclick="unlockNext()">Next chapter →</button>`:''}
+</div>
+${idx===CHAPTERS.length-1?renderSummarySection():''}`;
+
+  // make words clickable (non-underlined words)
+  const storyEl=document.getElementById('story-text');
+  makeTextClickable(storyEl);
+  // re-attach underlined word-tap events
+  document.querySelectorAll('.word-tap').forEach(el=>{
+    const w=el.dataset.word;
+    el.addEventListener('click',e=>{e.stopPropagation();showWordPopup(w,DEFS[w]||null,el);});
+    if(s.vocab.includes(w))el.classList.add('in-vocab');
+  });
+  // highlight any-word already in vocab
+  const allVocab=[...new Set(state.chapters.flatMap(c=>c.vocab))];
+  document.querySelectorAll('.word-any').forEach(el=>{
+    if(allVocab.includes(el.textContent)||allVocab.includes(el.textContent.toLowerCase()))el.classList.add('in-vocab');
+  });
+  raState='stopped';updateRaButtons();
+  checkAllAnswered(idx,false);
+}
+
+function renderQuestion(q,qi,chIdx){
+  const ans=state.chapters[chIdx].answers[qi]||{};
+  let mcHtml='';
+  if(q.q!=='open'&&q.options){
+    mcHtml=`<div class="mc-options">${q.options.map((opt,oi)=>`<label class="mc-option ${ans.mc===oi?'selected':''}" onclick="selectMC(${chIdx},${qi},${oi},this)"><input type="radio" name="q${chIdx}_${qi}" ${ans.mc===oi?'checked':''}> ${opt}</label>`).join('')}</div>`;
+  }
+  const hasText=ans.text&&ans.text.trim().length>3;
+  const answered=ans.mc!==undefined||hasText;
+  return`<div class="question-block" id="qblock-${qi}">
+  <div class="question-num">Question ${qi+1}</div>
+  <div class="question-text">${q.text}</div>
+  ${mcHtml}
+  <label class="own-answer-label">${q.q==='open'?'Your answer:':'Or write your own answer:'}</label>
+  <textarea class="own-answer ${hasText?'answered':''}" id="oa-${qi}" placeholder="Write what you think here..." onblur="saveText(${chIdx},${qi},this.value)">${ans.text||''}</textarea>
+  <div class="q-status ${answered?'show':''}" id="qstatus-${qi}">✓ answered</div>
+</div>`;
+}
+
+function renderVocabHTML(vocab){
+  if(!vocab||!vocab.length)return'<span class="vocab-empty">No words saved yet — tap any word while reading to add it.</span>';
+  return vocab.map(w=>`<div class="vocab-chip">${w}<button onclick="removeVocab('${w}')" title="I know this word">×</button></div>`).join('');
+}
+function renderVocab(){
+  const l=document.getElementById('vocab-list');
+  if(l)l.innerHTML=renderVocabHTML(state.chapters[state.currentChapter].vocab);
+}
+
+// ── ANSWERS ────────────────────────────────────────────────────────
+function selectMC(chIdx,qi,oi,labelEl){
+  state.chapters[chIdx].answers[qi]=state.chapters[chIdx].answers[qi]||{};
+  state.chapters[chIdx].answers[qi].mc=oi;
+  const block=document.getElementById(`qblock-${qi}`);
+  if(block)block.querySelectorAll('.mc-option').forEach(l=>l.classList.remove('selected'));
+  labelEl.classList.add('selected');
+  const st=document.getElementById(`qstatus-${qi}`);if(st)st.classList.add('show');
+  saveState();checkAllAnswered(chIdx,true);
+}
+function saveText(chIdx,qi,val){
+  state.chapters[chIdx].answers[qi]=state.chapters[chIdx].answers[qi]||{};
+  state.chapters[chIdx].answers[qi].text=val;
+  const ta=document.getElementById(`oa-${qi}`);if(ta)ta.classList.toggle('answered',val.trim().length>3);
+  if(val.trim().length>3){const st=document.getElementById(`qstatus-${qi}`);if(st)st.classList.add('show');}
+  saveState();checkAllAnswered(chIdx,true);
+}
+function checkAllAnswered(chIdx,showBanner){
+  const ch=CHAPTERS[chIdx];const s=state.chapters[chIdx];
+  const done=ch.questions.every((_,qi)=>{const a=s.answers[qi]||{};return a.mc!==undefined||(a.text&&a.text.trim().length>3);});
+  if(done&&!s.complete){
+    s.complete=true;saveState();
+    if(showBanner){const b=document.getElementById('complete-banner');if(b)b.classList.add('show');}
+    renderNav();
+    // if last chapter, refresh summary
+    if(chIdx===CHAPTERS.length-1)refreshSummarySection();
+  }
+}
+function unlockNext(){
+  const next=state.currentChapter+1;
+  if(next<CHAPTERS.length){state.chapters[next].unlocked=true;saveState();goToChapter(next);}
+}
+function removeVocab(word){
+  state.chapters[state.currentChapter].vocab=state.chapters[state.currentChapter].vocab.filter(w=>w!==word);
+  saveState();renderVocab();
+  document.querySelectorAll('.word-tap,.word-any').forEach(el=>{
+    if(el.textContent===word||el.textContent.toLowerCase()===word.toLowerCase())el.classList.remove('in-vocab');
+  });
+}
+
+// ── SUMMARY (inline at bottom of last chapter) ─────────────────────
+function renderSummarySection(){
+  const completed=state.chapters.filter(s=>s.complete).length;
+  const allTapped=[...new Set(state.chapters.flatMap(s=>s.wordsTapped))];
+  const allVocab=[...new Set(state.chapters.flatMap(s=>s.vocab))];
+
+  let html=`<div class="summary-divider">
+<div class="summary-section-title">Session Summary</div>
+<p class="summary-section-sub">Your reading record — download and email to your speech pathologist.</p>
+<div class="privacy-note"><strong>Privacy reminder:</strong> This contains your written responses. Before sending, make sure you're happy to share these. You can delete anything from the downloaded file first.</div>
+<div class="summary-block">
+  <div class="summary-block-title">Reading overview</div>
+  <div class="summary-stat-row"><span>Chapters completed</span><span class="summary-stat-val">${completed} of ${CHAPTERS.length}</span></div>
+  <div class="summary-stat-row"><span>All words tapped (heard or explored)</span><span class="summary-stat-val">${allTapped.length}</span></div>
+  <div class="summary-stat-row"><span>Unique words tapped</span><span class="summary-stat-val">${[...new Set(allTapped.map(w=>w.toLowerCase()))].length}</span></div>
+  <div class="summary-stat-row"><span>Words saved to vocab list</span><span class="summary-stat-val">${allVocab.length}</span></div>
+</div>`;
+
+  if(allTapped.length>0){
+    const uniqueTapped=[...new Set(allTapped.map(w=>w.toLowerCase()))];
+    html+=`<div class="summary-block">
+  <div class="summary-block-title">All words tapped (${uniqueTapped.length} unique)</div>
+  <div style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--ink-mid);line-height:2;">${uniqueTapped.join(' · ')}</div>
+</div>`;
+  }
+
+  if(allVocab.length>0){
+    html+=`<div class="summary-block">
+  <div class="summary-block-title">Vocab list (saved words)</div>
+  <div class="vocab-list" style="margin-top:0.3rem">${allVocab.map(w=>`<div class="vocab-chip">${w}</div>`).join('')}</div>
+</div>`;
+  }
+
+  CHAPTERS.forEach((ch,idx)=>{
+    const s=state.chapters[idx];
+    if(!s.complete&&Object.keys(s.answers).length===0)return;
+    const rows=ch.questions.map((q,qi)=>{
+      const a=s.answers[qi]||{};
+      const mc=a.mc!==undefined?q.options?.[a.mc]:null;
+      const own=a.text&&a.text.trim().length>3?a.text.trim():null;
+      if(!mc&&!own)return'';
+      return`<div class="summary-response">
+  <div class="summary-response-q">Q${qi+1}: ${q.text}</div>
+  ${mc?`<div class="summary-response-a"><em>Selected:</em> ${mc}</div>`:''}
+  ${own?`<div class="summary-response-a" style="margin-top:0.3rem"><em>Written:</em> ${own}</div>`:''}
+</div>`;
+    }).join('');
+    if(rows.replace(/\s/g,''))html+=`<div class="summary-block"><div class="summary-block-title">Chapter ${ch.num}: ${ch.title}</div>${rows}</div>`;
+  });
+
+  html+=`<div class="summary-actions">
+  <button class="btn-primary" onclick="downloadSummary()">Download summary</button>
+</div>
+<div class="email-reminder">Save the file, then email it to <strong>gwen@mobihealthcare.com.au</strong></div>
+</div>`;
+  return html;
+}
+
+function refreshSummarySection(){
+  const existing=document.querySelector('.summary-divider');
+  if(existing){
+    const tmp=document.createElement('div');
+    tmp.innerHTML=renderSummarySection();
+    existing.replaceWith(tmp.firstElementChild);
+  }
+}
+
+function downloadSummary(){
+  const now=new Date();
+  const ds=now.toLocaleDateString('en-AU',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\//g,'-');
+  const allTapped=[...new Set(state.chapters.flatMap(s=>s.wordsTapped).map(w=>w.toLowerCase()))];
+  const allVocab=[...new Set(state.chapters.flatMap(s=>s.vocab))];
+  const completed=state.chapters.filter(s=>s.complete).length;
+
+  let txt=`THE TIDE COMES IN — SESSION SUMMARY\n`;
+  txt+=`Date: ${now.toLocaleDateString('en-AU',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}\n\n`;
+  txt+=`READING OVERVIEW\nChapters completed: ${completed} of ${CHAPTERS.length}\nAll words tapped: ${allTapped.length}\nVocab words saved: ${allVocab.length}\n\n`;
+  if(allTapped.length)txt+=`ALL WORDS TAPPED\n${allTapped.join(', ')}\n\n`;
+  if(allVocab.length)txt+=`VOCAB LIST\n${allVocab.join(', ')}\n\n`;
+  CHAPTERS.forEach((ch,idx)=>{
+    const s=state.chapters[idx];
+    if(!s.complete&&Object.keys(s.answers).length===0)return;
+    txt+=`\nCHAPTER ${ch.num}: ${ch.title.toUpperCase()}\n${'─'.repeat(40)}\n`;
+    ch.questions.forEach((q,qi)=>{
+      const a=s.answers[qi]||{};
+      const mc=a.mc!==undefined?q.options?.[a.mc]:null;
+      const own=a.text&&a.text.trim().length>3?a.text.trim():null;
+      if(!mc&&!own)return;
+      txt+=`\nQ${qi+1}: ${q.text}\n`;
+      if(mc)txt+=`  Selected: ${mc}\n`;
+      if(own)txt+=`  Written: ${own}\n`;
+    });
+  });
+  txt+=`\n${'─'.repeat(40)}\nEmail to: gwen@mobihealthcare.com.au\n`;
+  const blob=new Blob([txt],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`${ds}-the-tide-comes-in.txt`;a.click();URL.revokeObjectURL(url);
+}
+
+// ── INIT ───────────────────────────────────────────────────────────
+function showMain(){
+  document.getElementById('screen-cover').classList.remove('active');
+  document.getElementById('screen-main').classList.add('active');
+  document.body.classList.remove('cover-active');
+  renderNav();renderChapter();
+}
+
+// If returning user has progress, skip cover
+if(state.chapters.some(c=>c.complete||Object.keys(c.answers).length>0)){
+  document.getElementById('screen-cover').classList.remove('active');
+  document.getElementById('screen-main').classList.add('active');
+  document.body.classList.remove('cover-active');
+  // go to furthest unlocked chapter
+  let target=0;
+  state.chapters.forEach((c,i)=>{if(c.unlocked||c.complete)target=i;});
+  state.currentChapter=target;
+  renderNav();renderChapter();
+} else {
+  document.body.classList.add('cover-active');
+}
+
+document.addEventListener('click',e=>{
+  const popup=document.getElementById('word-popup');
+  if(popup.classList.contains('show')&&!popup.contains(e.target)&&!e.target.classList.contains('word-tap')&&!e.target.classList.contains('word-any'))closePopup();
+});
+</script>
+</body>
+</html>
