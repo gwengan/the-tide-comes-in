@@ -115,10 +115,16 @@ body{font-family:'Source Serif 4',Georgia,serif;background:var(--paper);color:va
 .complete-banner p{font-size:0.9rem;color:var(--success);font-family:'DM Mono',monospace;}
 .complete-banner .next-btn{margin-top:0.8rem;padding:0.6rem 1.5rem;background:var(--accent);color:var(--paper);border:none;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.78rem;cursor:pointer;letter-spacing:0.05em;transition:background 0.15s;}
 .complete-banner .next-btn:hover{background:var(--accent-light);}
-/* SESSION SUMMARY (inline at bottom of main) */
-.summary-divider{margin-top:3rem;border-top:2px solid var(--paper-mid);padding-top:2.5rem;}
-.summary-section-title{font-family:'Playfair Display',serif;font-size:1.6rem;margin-bottom:0.3rem;}
-.summary-section-sub{font-size:0.9rem;color:var(--ink-mid);font-style:italic;margin-bottom:2rem;}
+/* FINISH SESSION BUTTON */
+.finish-session-area{margin-top:2.5rem;padding-top:2rem;border-top:0.5px solid var(--paper-mid);text-align:center;}
+.finish-session-prompt{font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--ink-light);margin-bottom:0.9rem;letter-spacing:0.02em;}
+.btn-session-summary{padding:0.75rem 2rem;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.82rem;letter-spacing:0.06em;cursor:pointer;transition:background 0.15s,transform 0.12s;}
+.btn-session-summary:hover{background:#1f5150;transform:translateY(-1px);}
+/* SUMMARY SCREEN */
+#screen-summary{max-width:800px;margin:0 auto;padding:3rem 1.5rem 5rem;}
+.summary-header{text-align:center;margin-bottom:3rem;padding-bottom:2rem;border-bottom:0.5px solid var(--paper-mid);}
+.summary-title{font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:0.5rem;}
+.summary-date{font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--ink-light);}
 .summary-block{background:var(--paper-warm);border:0.5px solid var(--paper-mid);border-radius:var(--rl);padding:1.2rem 1.4rem;margin-bottom:1.2rem;}
 .summary-block-title{font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:0.8rem;}
 .summary-stat-row{display:flex;justify-content:space-between;font-size:0.9rem;padding:0.25rem 0;border-bottom:0.5px solid var(--paper-mid);color:var(--ink-mid);}
@@ -127,13 +133,20 @@ body{font-family:'Source Serif 4',Georgia,serif;background:var(--paper);color:va
 .summary-response{margin-bottom:0.8rem;}
 .summary-response-q{font-size:0.82rem;color:var(--ink-mid);font-style:italic;margin-bottom:0.2rem;}
 .summary-response-a{font-size:0.9rem;color:var(--ink);background:var(--paper);border-radius:var(--r);padding:0.4rem 0.6rem;border:0.5px solid var(--paper-mid);}
-.privacy-note{background:var(--gold-light);border-left:3px solid var(--gold);border-radius:0 var(--r) var(--r) 0;padding:0.8rem 1rem;margin-bottom:1.5rem;font-size:0.85rem;color:var(--ink-mid);line-height:1.6;}
-.privacy-note strong{color:var(--ink);}
-.summary-actions{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:1.5rem;}
-.btn-primary{padding:0.7rem 1.8rem;background:var(--accent);color:var(--paper);border:none;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.8rem;letter-spacing:0.06em;cursor:pointer;transition:background 0.15s;}
-.btn-primary:hover{background:var(--accent-light);}
-.email-reminder{margin-top:1.2rem;font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--ink-light);line-height:1.7;}
+.summary-actions{display:flex;gap:0.8rem;flex-wrap:wrap;justify-content:center;margin-top:2rem;}
+.btn-primary{padding:0.7rem 1.8rem;background:var(--accent);color:var(--paper);border:none;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.8rem;letter-spacing:0.06em;cursor:pointer;transition:background 0.15s,transform 0.1s;}
+.btn-primary:hover{background:var(--accent-light);transform:translateY(-1px);}
+.btn-secondary{padding:0.7rem 1.8rem;background:transparent;color:var(--ink-mid);border:0.5px solid var(--paper-mid);border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.8rem;cursor:pointer;transition:all 0.15s;}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.email-reminder{margin-top:1.5rem;text-align:center;font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--ink-light);line-height:1.7;}
 .email-reminder strong{color:var(--teal);}
+/* PRINT */
+@media print{
+  #screen-cover,#screen-main,#site-footer,.summary-actions,.no-print{display:none!important;}
+  #screen-summary{display:block!important;padding:0;max-width:100%;}
+  .summary-block{break-inside:avoid;border:1px solid #ccc;background:#fff;}
+  body{background:#fff;}
+}
 @media(max-width:600px){.chapter-nav{grid-template-columns:repeat(5,1fr);}.story-header{flex-direction:column;align-items:flex-start;}.chapter-title{font-size:1.6rem;}}
 /* FOOTER */
 #site-footer{width:100%;border-top:0.5px solid var(--paper-mid);margin-top:0;padding:1.1rem 1.5rem;background:var(--paper);}
@@ -163,6 +176,22 @@ body.cover-active .footer-inner,body.cover-active .footer-inner a{color:rgba(255
   </div>
   <div class="chapter-nav" id="chapter-nav"></div>
   <div id="chapter-container"></div>
+</div>
+
+<div id="screen-summary">
+  <div class="summary-header">
+    <div class="summary-title">Session Summary</div>
+    <div class="summary-date" id="summary-date"></div>
+  </div>
+  <div id="summary-content"></div>
+  <div class="summary-actions no-print">
+    <button class="btn-primary" onclick="printSummary()">🖨 Save as PDF</button>
+    <button class="btn-secondary" onclick="backToStory()">← Back to story</button>
+  </div>
+  <div class="email-reminder no-print">After saving, email to <strong>gwen@mobihealthcare.com.au</strong></div>
+  <div id="after-print-prompt" class="no-print" style="display:none;margin-top:1.5rem;text-align:center;font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--teal);font-weight:500;">
+    Summary saved ✓ — <button onclick="backToStory()" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--teal);font-weight:700;cursor:pointer;text-decoration:underline;">return to story to continue →</button>
+  </div>
 </div>
 
 <div class="word-popup" id="word-popup">
@@ -641,11 +670,12 @@ let state;
 const saved=loadState();
 if(saved&&saved.chapters&&saved.chapters.length===CHAPTERS.length){
   state=saved;
+  if(state.summarySaved===undefined)state.summarySaved=false;
 }else{
   state={
     currentChapter:0,
     chapters:CHAPTERS.map(()=>({unlocked:false,complete:false,answers:{},vocab:[],wordsTapped:[]})),
-    showClinician:false,currentPopupWord:null
+    showClinician:false,currentPopupWord:null,summarySaved:false
   };
   state.chapters[0].unlocked=true;
 }
@@ -840,11 +870,15 @@ function renderChapter(){
   <p class="vocab-subtitle">Words you've tapped and saved. Remove any you already know.</p>
   <div class="vocab-list" id="vocab-list">${renderVocabHTML(s.vocab)}</div>
 </div>
+<div class="finish-session-area">
+  <p class="finish-session-prompt">Click here when finished to view and save your session summary.</p>
+  <button class="btn-session-summary" onclick="showSummary()">📄 Session summary</button>
+</div>
 <div class="complete-banner ${s.complete?'show':''}" id="complete-banner">
   <p>Chapter ${ch.num} complete ✓</p>
-  ${idx<CHAPTERS.length-1?`<button class="next-btn" onclick="unlockNext()">Next chapter →</button>`:''}
+  ${idx<CHAPTERS.length-1?(state.summarySaved?`<button class="next-btn" onclick="unlockNext()">Next chapter →</button>`:`<p style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--ink-light);margin-top:0.6rem;">Save your session summary above to unlock the next chapter.</p>`):''}
 </div>
-${idx===CHAPTERS.length-1?renderSummarySection():''}`;
+`;
 
   // make words clickable (non-underlined words)
   const storyEl=document.getElementById('story-text');
@@ -915,8 +949,6 @@ function checkAllAnswered(chIdx,showBanner){
     s.complete=true;saveState();
     if(showBanner){const b=document.getElementById('complete-banner');if(b)b.classList.add('show');}
     renderNav();
-    // if last chapter, refresh summary
-    if(chIdx===CHAPTERS.length-1)refreshSummarySection();
   }
 }
 function unlockNext(){
@@ -931,26 +963,49 @@ function removeVocab(word){
   });
 }
 
-// ── SUMMARY (inline at bottom of last chapter) ─────────────────────
-function renderSummarySection(){
+// ── SUMMARY SCREEN ────────────────────────────────────────────────
+function showSummary(){
+  if(typeof synth!=='undefined'&&synth)synth.cancel();
+  raStop();
+  document.getElementById('screen-main').classList.remove('active');
+  document.getElementById('screen-summary').classList.add('active');
+  buildSummary();
+  window.scrollTo(0,0);
+}
+
+function printSummary(){
+  state.summarySaved=true;saveState();
+  window.onafterprint=function(){
+    const prompt=document.getElementById('after-print-prompt');
+    if(prompt)prompt.style.display='block';
+  };
+  window.print();
+}
+
+function backToStory(){
+  document.getElementById('screen-summary').classList.remove('active');
+  document.getElementById('screen-main').classList.add('active');
+  renderChapter();renderNav();
+  window.scrollTo(0,0);
+}
+
+function buildSummary(){
+  const now=new Date();
+  document.getElementById('summary-date').textContent=now.toLocaleDateString('en-AU',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const completed=state.chapters.filter(s=>s.complete).length;
   const allTapped=[...new Set(state.chapters.flatMap(s=>s.wordsTapped))];
   const allVocab=[...new Set(state.chapters.flatMap(s=>s.vocab))];
+  const uniqueTapped=[...new Set(allTapped.map(w=>w.toLowerCase()))];
 
-  let html=`<div class="summary-divider">
-<div class="summary-section-title">Session Summary</div>
-<p class="summary-section-sub">Your reading record — download and email to your speech pathologist.</p>
-<div class="privacy-note"><strong>Privacy reminder:</strong> This contains your written responses. Before sending, make sure you're happy to share these. You can delete anything from the downloaded file first.</div>
-<div class="summary-block">
+  let html=`<div class="summary-block">
   <div class="summary-block-title">Reading overview</div>
   <div class="summary-stat-row"><span>Chapters completed</span><span class="summary-stat-val">${completed} of ${CHAPTERS.length}</span></div>
   <div class="summary-stat-row"><span>All words tapped (heard or explored)</span><span class="summary-stat-val">${allTapped.length}</span></div>
-  <div class="summary-stat-row"><span>Unique words tapped</span><span class="summary-stat-val">${[...new Set(allTapped.map(w=>w.toLowerCase()))].length}</span></div>
+  <div class="summary-stat-row"><span>Unique words tapped</span><span class="summary-stat-val">${uniqueTapped.length}</span></div>
   <div class="summary-stat-row"><span>Words saved to vocab list</span><span class="summary-stat-val">${allVocab.length}</span></div>
 </div>`;
 
-  if(allTapped.length>0){
-    const uniqueTapped=[...new Set(allTapped.map(w=>w.toLowerCase()))];
+  if(uniqueTapped.length>0){
     html+=`<div class="summary-block">
   <div class="summary-block-title">All words tapped (${uniqueTapped.length} unique)</div>
   <div style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--ink-mid);line-height:2;">${uniqueTapped.join(' · ')}</div>
@@ -981,53 +1036,7 @@ function renderSummarySection(){
     if(rows.replace(/\s/g,''))html+=`<div class="summary-block"><div class="summary-block-title">Chapter ${ch.num}: ${ch.title}</div>${rows}</div>`;
   });
 
-  html+=`<div class="summary-actions">
-  <button class="btn-primary" onclick="downloadSummary()">Download summary</button>
-</div>
-<div class="email-reminder">Save the file, then email it to <strong>gwen@mobihealthcare.com.au</strong></div>
-</div>`;
-  return html;
-}
-
-function refreshSummarySection(){
-  const existing=document.querySelector('.summary-divider');
-  if(existing){
-    const tmp=document.createElement('div');
-    tmp.innerHTML=renderSummarySection();
-    existing.replaceWith(tmp.firstElementChild);
-  }
-}
-
-function downloadSummary(){
-  const now=new Date();
-  const ds=now.toLocaleDateString('en-AU',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\//g,'-');
-  const allTapped=[...new Set(state.chapters.flatMap(s=>s.wordsTapped).map(w=>w.toLowerCase()))];
-  const allVocab=[...new Set(state.chapters.flatMap(s=>s.vocab))];
-  const completed=state.chapters.filter(s=>s.complete).length;
-
-  let txt=`THE TIDE COMES IN — SESSION SUMMARY\n`;
-  txt+=`Date: ${now.toLocaleDateString('en-AU',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}\n\n`;
-  txt+=`READING OVERVIEW\nChapters completed: ${completed} of ${CHAPTERS.length}\nAll words tapped: ${allTapped.length}\nVocab words saved: ${allVocab.length}\n\n`;
-  if(allTapped.length)txt+=`ALL WORDS TAPPED\n${allTapped.join(', ')}\n\n`;
-  if(allVocab.length)txt+=`VOCAB LIST\n${allVocab.join(', ')}\n\n`;
-  CHAPTERS.forEach((ch,idx)=>{
-    const s=state.chapters[idx];
-    if(!s.complete&&Object.keys(s.answers).length===0)return;
-    txt+=`\nCHAPTER ${ch.num}: ${ch.title.toUpperCase()}\n${'─'.repeat(40)}\n`;
-    ch.questions.forEach((q,qi)=>{
-      const a=s.answers[qi]||{};
-      const mc=a.mc!==undefined?q.options?.[a.mc]:null;
-      const own=a.text&&a.text.trim().length>3?a.text.trim():null;
-      if(!mc&&!own)return;
-      txt+=`\nQ${qi+1}: ${q.text}\n`;
-      if(mc)txt+=`  Selected: ${mc}\n`;
-      if(own)txt+=`  Written: ${own}\n`;
-    });
-  });
-  txt+=`\n${'─'.repeat(40)}\nEmail to: gwen@mobihealthcare.com.au\n`;
-  const blob=new Blob([txt],{type:'text/plain'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`${ds}-the-tide-comes-in.txt`;a.click();URL.revokeObjectURL(url);
+  document.getElementById('summary-content').innerHTML=html;
 }
 
 // ── INIT ───────────────────────────────────────────────────────────
