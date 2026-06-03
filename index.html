@@ -163,9 +163,10 @@ body.cover-active .footer-inner,body.cover-active .footer-inner a{color:rgba(255
 <div id="screen-cover" class="active">
   <div class="cover-wave"></div>
   <div class="cover-title">The Tide<br>Comes In</div>
+  <div class="cover-subtitle">a story</div>
   <div class="cover-wave"></div>
   <p class="cover-tagline">Ten chapters. One girl navigating loss, loyalty, and the hardest choices she's ever had to make.</p>
-  <button class="cover-btn" onclick="showMain()">Begin reading</button>
+  <button class="cover-btn" id="cover-read-btn" onclick="showMain()">Begin reading</button>
   <div class="cover-note">tap any word in the story to hear it and add it to your vocab list</div>
 </div>
 
@@ -1039,26 +1040,49 @@ function buildSummary(){
 }
 
 // ── INIT ───────────────────────────────────────────────────────────
-function showMain(){
-  document.getElementById('screen-cover').classList.remove('active');
-  document.getElementById('screen-main').classList.add('active');
-  document.body.classList.remove('cover-active');
-  renderNav();renderChapter();
+function hasReadingProgress(){
+  return state.chapters.some((c,i)=>
+    i>0&&c.unlocked ||
+    c.complete ||
+    Object.keys(c.answers||{}).length>0 ||
+    (c.vocab&&c.vocab.length>0) ||
+    (c.wordsTapped&&c.wordsTapped.length>0)
+  );
 }
 
-// If returning user has progress, skip cover
-if(state.chapters.some(c=>c.complete||Object.keys(c.answers).length>0)){
-  document.getElementById('screen-cover').classList.remove('active');
-  document.getElementById('screen-main').classList.add('active');
-  document.body.classList.remove('cover-active');
-  // go to furthest unlocked chapter
+function getResumeChapter(){
+  const current=Number.isInteger(state.currentChapter)?state.currentChapter:0;
+  const currentState=state.chapters[current];
+  if(currentState&&(currentState.unlocked||currentState.complete))return current;
+
   let target=0;
   state.chapters.forEach((c,i)=>{if(c.unlocked||c.complete)target=i;});
-  state.currentChapter=target;
-  renderNav();renderChapter();
-} else {
-  document.body.classList.add('cover-active');
+  return target;
 }
+
+function updateCoverButton(){
+  const btn=document.getElementById('cover-read-btn');
+  if(btn)btn.textContent=hasReadingProgress()?'Continue reading':'Begin reading';
+}
+
+function showMain(){
+  state.currentChapter=getResumeChapter();
+  saveState();
+  document.getElementById('screen-cover').classList.remove('active');
+  document.getElementById('screen-main').classList.add('active');
+  document.getElementById('screen-summary').classList.remove('active');
+  document.body.classList.remove('cover-active');
+  renderNav();renderChapter();
+  window.scrollTo(0,0);
+}
+
+// Always start on the cover/story-title page after a fresh browser load.
+// Progress is still saved in localStorage; the cover button resumes the saved chapter.
+document.getElementById('screen-cover').classList.add('active');
+document.getElementById('screen-main').classList.remove('active');
+document.getElementById('screen-summary').classList.remove('active');
+document.body.classList.add('cover-active');
+updateCoverButton();
 
 document.addEventListener('click',e=>{
   const popup=document.getElementById('word-popup');
